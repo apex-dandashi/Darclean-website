@@ -1,0 +1,55 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+
+@theme {
+  --font-arabic: 'IBM Plex Sans Arabic', Arial, sans-serif;
+  --font-latin: 'Manrope', Arial, sans-serif;
+  
+  /* DarClean Official Color Palette */
+  --color-darclean-teal: #0B4F55;
+  --color-darclean-teal-hover: #083F44;
+  --color-darclean-mint: #49C7B5;
+  --color-darclean-mint-hover: #3EB3A2;
+  --color-darclean-ivory: #F7F3EA;
+  --color-darclean-charcoal: #18292C;
+  --color-darclean-yellow: #F2C85B;
+  --color-darclean-border: #E5E0D5;
+  --color-darclean-muted: #5C6E71;
+}
+
+:root {
+  --teal: #0B4F55;
+  --mint: #49C7B5;
+  --ivory: #F7F3EA;
+  --charcoal: #18292C;
+  --yellow: #F2C85B;
+}
+
+[dir="rtl"] {
+  font-family: 'IBM Plex Sans Arabic', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+[dir="ltr"] {
+  font-family: 'Manrope', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+}
+
+body {
+  background-color: #F7F3EA;
+  color: #18292C;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Controlled Doorway Arch Motif */
+.darclean-arch {
+  border-top-left-radius: 9999px;
+  border-top-right-radius: 9999px;
+}
+
+.darclean-card {
+  background: #FFFFFF;
+  border-radius: 16px;
+  border: 1px solid #E5E0D5;
+  box-shadow: 0 4px 16px rgba(11, 79, 85, 0.04);
+}
+

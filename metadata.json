@@ -1,0 +1,6 @@
+{
+  "name": "DarClean / دار كلين",
+  "description": "Bilingual home and commercial cleaning platform serving Tripoli and North Lebanon with upfront pricing, instant booking, and re-clean guarantee.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
