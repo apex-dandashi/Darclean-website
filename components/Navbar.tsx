@@ -73,7 +73,7 @@ export default function Navbar({ lang }: NavbarProps) {
           <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
             <span className="flex items-center gap-1 text-[#F2C85B] font-semibold">
               <MapPin className="w-3.5 h-3.5 text-[#F2C85B]" />
-              {lang === 'ar' ? 'طرابلس الفيحاء والميناء والجوار' : 'Tripoli, Al-Mina & surrounding areas'}
+              {lang === 'ar' ? 'طرابلس والكورة والجوار' : 'Tripoli, Koura & surrounding areas'}
             </span>
             <span className="hidden md:inline text-[#49C7B5]/60">•</span>
             <span className="hidden md:flex items-center gap-1 text-[#F7F3EA]">

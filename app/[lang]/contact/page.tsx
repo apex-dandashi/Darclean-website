@@ -2,10 +2,12 @@ import React from 'react';
 import { notFound } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import BreadcrumbSchema from '@/components/BreadcrumbSchema';
 import { Language } from '@/lib/types';
 import { DICTIONARY, WHATSAPP_LINK, WHATSAPP_NUMBER } from '@/lib/i18n';
-import { MessageCircle, Phone, MapPin, Clock, Globe, ArrowLeft, ArrowRight } from 'lucide-react';
+import { MessageCircle, MapPin, Clock, ArrowLeft, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import type { Metadata } from 'next';
 
 interface PageProps {
   params: Promise<{ lang: string }>;
@@ -13,6 +15,38 @@ interface PageProps {
 
 export async function generateStaticParams() {
   return [{ lang: 'ar' }, { lang: 'en' }];
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { lang } = await params;
+  const isAr = lang === 'ar';
+  const url = `https://darclean.pro/${lang}/contact`;
+
+  return {
+    title: isAr
+      ? 'اتصل بنا | دار كلين للتنظيف في طرابلس والكورة - واتساب وهاتف'
+      : 'Contact Us | DarClean Cleaning Tripoli & Koura - WhatsApp & Phone',
+    description: isAr
+      ? 'تواصل مع فريق دار كلين عبر واتساب المباشر (+961 70 662 385) للحجز الفوري، الاستفسار عن الأسعار، أو طلب عروض تنظيف مخصصة في طرابلس والكورة والجوار.'
+      : 'Contact DarClean via direct WhatsApp (+961 70 662 385) for instant cleaning bookings, pricing inquiries, and commercial proposals across Tripoli and Koura.',
+    alternates: {
+      canonical: url,
+      languages: {
+        ar: 'https://darclean.pro/ar/contact',
+        en: 'https://darclean.pro/en/contact',
+        'x-default': 'https://darclean.pro/ar/contact',
+      },
+    },
+    openGraph: {
+      title: isAr
+        ? 'تواصل مع دار كلين | واتساب مباشر'
+        : 'Contact DarClean | Direct WhatsApp Support',
+      description: isAr
+        ? 'فريق العمليات متواجد يومياً من 8 صباحاً حتى 7 مساءً لخدمتكم والإجابة على استفساراتكم.'
+        : 'Operations team available daily 8:00 AM – 7:00 PM for all your cleaning needs.',
+      url,
+    },
+  };
 }
 
 export default async function ContactPage({ params }: PageProps) {
@@ -23,9 +57,19 @@ export default async function ContactPage({ params }: PageProps) {
 
   const t = DICTIONARY[lang as Language];
   const isRtl = lang === 'ar';
+  const isAr = lang === 'ar';
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-800" dir={t.dir}>
+      <BreadcrumbSchema
+        lang={lang as Language}
+        items={[
+          {
+            name: isAr ? 'اتصل بنا' : 'Contact Us',
+            url: `https://darclean.pro/${lang}/contact`,
+          },
+        ]}
+      />
       <Navbar lang={lang as Language} />
 
       {/* Header */}
@@ -37,8 +81,8 @@ export default async function ContactPage({ params }: PageProps) {
             </span>
             <h1 className="text-3xl sm:text-4xl font-extrabold text-white">
               {lang === 'ar'
-                ? 'تواصل مع دار كلين في طرابلس الفيحاء'
-                : 'Get in Touch with DarClean Tripoli'}
+                ? 'تواصل مع دار كلين في طرابلس والكورة والجوار'
+                : 'Get in Touch with DarClean Tripoli & Koura'}
             </h1>
             <p className="text-slate-300 text-sm mt-3 leading-relaxed">
               {lang === 'ar'
@@ -98,7 +142,7 @@ export default async function ContactPage({ params }: PageProps) {
                         : 'Tripoli (Dam w Farez / Al-Tell) & Al-Mina, North Lebanon'}
                     </span>
                     <p className="text-xs text-slate-500 mt-1">
-                      {lang === 'ar' ? 'نغطي طرابلس والميناء والجوار' : 'Covering all Tripoli districts & surroundings'}
+                      {lang === 'ar' ? 'نغطي طرابلس والكورة والجوار' : 'Covering Tripoli, Koura & surrounding areas'}
                     </p>
                   </div>
                 </div>

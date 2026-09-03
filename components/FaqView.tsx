@@ -70,10 +70,10 @@ export default function FaqView({ lang }: FaqViewProps) {
       aEn: 'If any covered spot does not meet your satisfaction, notify us within 24 hours of job completion through your private booking link or WhatsApp, and we will send our team back to resolve it free of charge.',
     },
     {
-      qAr: 'هل تقدمون خدماتكم خارج طرابلس والميناء؟',
-      qEn: 'Do you serve areas outside Tripoli and Al-Mina?',
-      aAr: 'نعم، نخدم البلدات المجاورة مثل القلمون (رسم انتقال 3$)، البداوي (2$)، الكورة - رأس مسقا وبرسا (4$)، وزغرتا ومجدليا (5$). رسوم الانتقال محددة بشفافية مسبقاً وتضاف للفاتورة دون أي زيادة عند الباب.',
-      aEn: 'Yes! We cover neighboring municipalities with flat nominal travel surcharges: Al-Qalamoun ($3), Beddawi ($2), Koura - Ras Maska/Barsa ($4), and Zgharta/Majdlaya ($5).',
+      qAr: 'هل تقدمون خدماتكم في الكورة والجوار وخارج طرابلس؟',
+      qEn: 'Do you serve El Koura and areas surrounding Tripoli?',
+      aAr: 'نعم، نغطي قضاء الكورة بالكامل (رأس مسقا، برسا، ضهر العين، أميون، كوسبا، دده...)، والقلمون (رسم انتقال 3$)، البداوي (2$)، وزغرتا ومجدليا والمنية (5$). رسوم الانتقال محددة بشفافية مسبقاً وتضاف للفاتورة دون أي زيادة عند الباب.',
+      aEn: 'Yes! We cover the entire El Koura district (Ras Maska, Barsa, Dahr El-Ain, Amioun, Kousba, Deddeh), Al-Qalamoun ($3), Beddawi ($2), and Zgharta/Minieh ($5) with transparent flat travel surcharges.',
     },
     {
       qAr: 'هل يمكنني تعديل الموعد أو الإلغاء؟',

@@ -179,8 +179,8 @@ export default function HomePageView({ lang }: HomePageViewProps) {
     {
       q: lang === 'ar' ? 'كيف يتم احتساب السعر؟' : 'How is pricing calculated?',
       a: lang === 'ar' 
-        ? 'السعر القياسي هو 10$ لكل عامل تنظيف في الساعة، بحد أدنى ساعتان لكل عامل (20$ كحد أدنى). يشمل السعر مواد التنظيف المعتمدة والمعدات الأساسية والتنقل داخل طرابلس والميناء.'
-        : 'Standard pricing starts at $10 per cleaner-hour with a 2-hour minimum per cleaner ($20 min). Cleaning supplies, agreed gear, and transportation within Tripoli & Al-Mina are fully included.'
+        ? 'السعر القياسي هو 10$ لكل عامل تنظيف في الساعة، بحد أدنى ساعتان لكل عامل (20$ كحد أدنى). يشمل السعر مواد التنظيف المعتمدة والمعدات الأساسية والتنقل داخل طرابلس والميناء، مع رسوم تنقل رمزية وشفافة للكورة والبلدات المجاورة.'
+        : 'Standard pricing starts at $10 per cleaner-hour with a 2-hour minimum per cleaner ($20 min). Cleaning supplies, agreed gear, and transportation within Tripoli & Al-Mina are fully included, with nominal travel fees for Koura and surrounding towns.'
     },
     {
       q: lang === 'ar' ? 'هل مواد وأدوات التنظيف مشمولة؟' : 'Are cleaning supplies and tools included?',
@@ -197,20 +197,37 @@ export default function HomePageView({ lang }: HomePageViewProps) {
     {
       q: lang === 'ar' ? 'ما هي طرق الدفع المتاحة؟' : 'What payment methods do you accept?',
       a: lang === 'ar'
-        ? 'نقبل الدفع نقداً بالدولار أو ما يعادله عند اكتمال العمل، أو التحويل المباشر عبر Whish Money (وش موني).'
-        : 'We accept Cash in USD upon completion of the service, as well as digital transfer via Whish Money.'
+        ? 'نقبل الدفع نقداً بالدولار أو ما يعادله بالليرة اللبنانية عند اكتمال العمل، أو التحويل المباشر عبر Whish Money (وش موني).'
+        : 'We accept Cash in USD or LBP upon completion of the service, as well as digital transfer via Whish Money.'
     },
     {
-      q: lang === 'ar' ? 'هل تغطون مناطق خارج طرابلس؟' : 'Do you cover areas outside Tripoli?',
+      q: lang === 'ar' ? 'هل تغطون الكورة ومناطق خارج طرابلس؟' : 'Do you cover El Koura and areas outside Tripoli?',
       a: lang === 'ar'
-        ? 'نعم، نخدم القلمون، الكورة (رأس مسقا، برسا، أميون...)، والبداوي برسم انتقال رمزي شفاف يُحدد قبل تأكيد الحجز.'
-        : 'Yes, we serve neighboring towns including Qalamoun, Koura (Ras Maska, Barsa), and Beddawi with a transparent nominal travel fee disclosed before booking.'
+        ? 'نعم، نغطي طرابلس والكورة (رأس مسقا، برسا، ضهر العين، أميون، كوسبا، دده...)، والقلمون، والبداوي برسم انتقال رمزي شفاف يُحدد مسبقاً قبل تأكيد الحجز.'
+        : 'Yes, we serve Tripoli, El Koura (Ras Maska, Barsa, Dahr El-Ain, Amioun, Kousba, Deddeh), Qalamoun, and Beddawi with transparent flat travel surcharges.'
     },
   ];
+
+  const homeFaqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map((item) => ({
+      '@type': 'Question',
+      name: item.q,
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: item.a,
+      },
+    })),
+  };
 
   return (
     <div className="min-h-screen bg-[#F7F3EA] text-[#18292C]" dir={isRtl ? 'rtl' : 'ltr'}>
       <StructuredData lang={lang} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(homeFaqSchema) }}
+      />
       
       {/* 1. HEADER WITH APPROVED LOGO, NAVIGATION, LANGUAGE SWITCH & WHATSAPP BUTTON */}
       <Navbar lang={lang} />
@@ -1248,8 +1265,8 @@ export default function HomePageView({ lang }: HomePageViewProps) {
             </h2>
             <p className="text-xs sm:text-sm text-[#5C6E71]">
               {lang === 'ar'
-                ? 'ثقة ببيوت وشركات طرابلس والميناء، من ناس متلك جرّبونا وشافوا النتيجة'
-                : 'Real trust from local families, clinics, and businesses across Tripoli and Al-Mina'}
+                ? 'ثقة ببيوت وشركات طرابلس والكورة والجوار، من ناس متلك جرّبونا وشافوا النتيجة'
+                : 'Real trust from local families, clinics, and businesses across Tripoli, Koura & surrounding areas'}
             </p>
           </div>
 

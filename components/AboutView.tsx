@@ -151,8 +151,8 @@ export default function AboutView({ lang }: AboutViewProps) {
                 <CheckCircle2 className="w-4 h-4 text-[#49C7B5] flex-shrink-0 mt-0.5" />
                 <span>
                   {lang === 'ar'
-                    ? 'المركز الرئيسي: طرابلس، لبنان (نخدم كافة أحياء المدينة والميناء والمناطق المحيطة).'
-                    : 'Service Base: Tripoli, North Lebanon (covering city center, Al-Mina, and surrounding towns).'}
+                    ? 'المركز الرئيسي: طرابلس، لبنان (نغطي طرابلس والكورة والجوار ومحيطها بالكامل).'
+                    : 'Service Base: Tripoli, North Lebanon (covering Tripoli, Koura, and surrounding areas).'}
                 </span>
               </div>
               <div className="flex items-start gap-2.5">

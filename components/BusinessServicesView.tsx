@@ -53,8 +53,8 @@ export default function BusinessServicesView({ lang }: BusinessServicesViewProps
       id: 'retail',
       titleAr: 'تنظيف المحلات التجارية والمعارض',
       titleEn: 'Retail Stores & Showrooms',
-      descAr: 'المحافظة على بيئة تسوق مشرقة ونظيفة لواجهات الزجاج، الأرضيات اللامعة، وممرات الزبائن في أسواق ومولات طرابلس والميناء.',
-      descEn: 'Maintaining a spotless shopping atmosphere with gleaming display windows, clean aisles, and sanitary fitting rooms for Tripoli retail spaces.',
+      descAr: 'المحافظة على بيئة تسوق مشرقة ونظيفة لواجهات الزجاج، الأرضيات اللامعة، وممرات الزبائن في أسواق ومولات طرابلس والكورة والجوار.',
+      descEn: 'Maintaining a spotless shopping atmosphere with gleaming display windows, clean aisles, and sanitary fitting rooms for retail spaces in Tripoli, Koura & surrounding areas.',
       featuresAr: [
         'تلميع واجهات الزجاج الخارجية والداخلية بدون ترك آثار',
         'كنس ومسح الأرضيات بمواد تلميع مخصصة لحركة المشاة العالية',
