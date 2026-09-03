@@ -1,6 +1,6 @@
 import React from 'react';
 import { Language } from '@/lib/types';
-import { WHATSAPP_NUMBER } from '@/lib/i18n';
+import { WHATSAPP_LINK, WHATSAPP_NUMBER } from '@/lib/i18n';
 
 interface StructuredDataProps {
   lang: Language;
@@ -132,7 +132,7 @@ export default function StructuredData({ lang }: StructuredDataProps) {
       worstRating: '1',
     },
     sameAs: [
-      'https://wa.me/96170662385',
+      WHATSAPP_LINK,
       'https://darclean.pro',
     ],
     hasOfferCatalog: {

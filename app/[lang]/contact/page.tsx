@@ -27,8 +27,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       ? 'اتصل بنا | دار كلين للتنظيف في طرابلس والكورة - واتساب وهاتف'
       : 'Contact Us | DarClean Cleaning Tripoli & Koura - WhatsApp & Phone',
     description: isAr
-      ? 'تواصل مع فريق دار كلين عبر واتساب المباشر (+961 70 662 385) للحجز الفوري، الاستفسار عن الأسعار، أو طلب عروض تنظيف مخصصة في طرابلس والكورة والجوار.'
-      : 'Contact DarClean via direct WhatsApp (+961 70 662 385) for instant cleaning bookings, pricing inquiries, and commercial proposals across Tripoli and Koura.',
+      ? `تواصل مع فريق دار كلين عبر واتساب المباشر (${WHATSAPP_NUMBER}) للحجز الفوري، الاستفسار عن الأسعار، أو طلب عروض تنظيف مخصصة في طرابلس والكورة والجوار.`
+      : `Contact DarClean via direct WhatsApp (${WHATSAPP_NUMBER}) for instant cleaning bookings, pricing inquiries, and commercial proposals across Tripoli and Koura.`,
     alternates: {
       canonical: url,
       languages: {

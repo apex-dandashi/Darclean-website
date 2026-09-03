@@ -71,6 +71,8 @@ export default function CommercialQuoteView({ lang }: CommercialQuoteViewProps) 
     }
 
     setSubmitting(true);
+    let quoteResult: any = null;
+
     try {
       const res = await fetch('/api/commercial-quotes', {
         method: 'POST',
@@ -78,17 +80,68 @@ export default function CommercialQuoteView({ lang }: CommercialQuoteViewProps) 
         body: JSON.stringify(formData),
       });
 
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Submission failed');
+      if (res.ok) {
+        const data = await res.json();
+        quoteResult = data.quote;
       }
-
-      setSubmittedQuote(data.quote);
-    } catch (err: any) {
-      setErrorMessage(err.message || 'Error sending quote request');
-    } finally {
-      setSubmitting(false);
+    } catch (networkErr) {
+      console.warn('Network issue saving quote to server, continuing directly via WhatsApp:', networkErr);
     }
+
+    if (!quoteResult) {
+      const fallbackRef = `CQ-${Math.floor(1000 + Math.random() * 9000)}`;
+      quoteResult = {
+        id: `cq-${Date.now()}`,
+        reference: fallbackRef,
+        ...formData,
+      };
+    }
+
+    setSubmittedQuote(quoteResult);
+
+    // Build rich, complete WhatsApp message for commercial team
+    const isAr = lang === 'ar';
+    const area = DEFAULT_SERVICE_AREAS.find((a) => a.id === formData.areaId);
+    const areaName = area ? (isAr ? area.nameAr : area.nameEn) : formData.areaId;
+
+    let msg = '';
+    if (isAr) {
+      msg = `مرحباً دار كلين، أود طلب تسعيرة تنظيف تجاري ومعاينة ميدانية:
+📌 *رقم المرجع:* ${quoteResult.reference}
+🏢 *اسم المنشأة/الشركة:* ${formData.companyName.trim()}
+👤 *المسؤول للتواصل:* ${formData.contactPerson.trim()}
+📞 *رقم الهاتف:* ${formData.phone.trim()}${formData.email.trim() ? `\n📧 *البريد الإلكتروني:* ${formData.email.trim()}` : ''}
+🏬 *نوع النشاط:* ${formData.businessType}
+📐 *المساحة التقديرية:* ${formData.estimatedSqm ? `${formData.estimatedSqm} م²` : 'غير محددة'}
+📍 *المنطقة:* ${areaName}${formData.address.trim() ? ` - ${formData.address.trim()}` : ''}
+🔄 *الدورية المطلوبة:* ${formData.frequency}
+⏰ *التوقيت المفضل للعمل:* ${formData.preferredTiming}
+🛠️ *الخدمات المطلوبة:* ${formData.serviceNeeds.length > 0 ? formData.serviceNeeds.join('، ') : 'تنظيف عام دوري'}${formData.notes.trim() ? `\n📝 *ملاحظات خاصة:* ${formData.notes.trim()}` : ''}`;
+    } else {
+      msg = `Hello DarClean, I would like to request a commercial cleaning quote & site survey:
+📌 *Quote Ref:* ${quoteResult.reference}
+🏢 *Company:* ${formData.companyName.trim()}
+👤 *Contact Person:* ${formData.contactPerson.trim()}
+📞 *Phone:* ${formData.phone.trim()}${formData.email.trim() ? `\n📧 *Email:* ${formData.email.trim()}` : ''}
+🏬 *Business Type:* ${formData.businessType}
+📐 *Estimated Area:* ${formData.estimatedSqm ? `${formData.estimatedSqm} sqm` : 'Not specified'}
+📍 *Location:* ${areaName}${formData.address.trim() ? ` - ${formData.address.trim()}` : ''}
+🔄 *Frequency:* ${formData.frequency}
+⏰ *Preferred Timing:* ${formData.preferredTiming}
+🛠️ *Services Needed:* ${formData.serviceNeeds.length > 0 ? formData.serviceNeeds.join(', ') : 'General cleaning'}${formData.notes.trim() ? `\n📝 *Notes:* ${formData.notes.trim()}` : ''}`;
+    }
+
+    const waUrl = `${WHATSAPP_LINK}?text=${encodeURIComponent(msg)}`;
+
+    // DIRECT SUBMISSION TO WHATSAPP
+    if (typeof window !== 'undefined') {
+      const opened = window.open(waUrl, '_blank');
+      if (!opened || opened.closed || typeof opened.closed === 'undefined') {
+        window.location.href = waUrl;
+      }
+    }
+
+    setSubmitting(false);
   };
 
   return (
@@ -120,13 +173,28 @@ export default function CommercialQuoteView({ lang }: CommercialQuoteViewProps) 
       <section className="py-16">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
           {submittedQuote ? (
-            <div className="bg-white rounded-3xl border border-[#E5E0D5] p-8 text-center space-y-6 shadow-sm">
+            <div className="bg-white rounded-3xl border border-[#E5E0D5] p-6 sm:p-10 text-center space-y-6 shadow-sm">
+              {/* WhatsApp Status Alert */}
+              <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-start gap-3 text-start">
+                <MessageCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                <div className="text-xs sm:text-sm">
+                  <span className="font-bold block">
+                    {lang === 'ar' ? 'تم تحويل طلب التسعيرة مباشرة إلى واتساب' : 'Quote request routed directly to WhatsApp!'}
+                  </span>
+                  <p className="text-emerald-700 mt-0.5">
+                    {lang === 'ar'
+                      ? 'إذا لم يفتح تطبيق واتساب تلقائياً، يرجى الضغط على الزر الأخضر بالأسفل لإرسال التفاصيل مباشرة إلى إدارة العمليات التجارية.'
+                      : 'If WhatsApp did not open automatically, tap the green button below to send your details directly to commercial operations.'}
+                  </p>
+                </div>
+              </div>
+
               <div className="w-16 h-16 rounded-full bg-[#0B4F55]/10 text-[#0B4F55] flex items-center justify-center mx-auto">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
 
               <div className="space-y-2">
-                <span className="px-3 py-1 rounded-full bg-[#0B4F55]/10 text-[#0B4F55] text-xs font-bold border border-[#0B4F55]/20">
+                <span className="px-3 py-1 rounded-full bg-[#0B4F55]/10 text-[#0B4F55] text-xs font-bold border border-[#0B4F55]/20 font-mono">
                   {submittedQuote.reference}
                 </span>
                 <h2 className="text-2xl font-bold text-[#0B4F55]">
@@ -134,7 +202,7 @@ export default function CommercialQuoteView({ lang }: CommercialQuoteViewProps) 
                 </h2>
                 <p className="text-xs sm:text-sm text-[#5C6E71] max-w-lg mx-auto">
                   {lang === 'ar'
-                    ? `شكراً ${submittedQuote.contactPerson}. سيقوم مسؤول الحسابات التجارية في دار كلين بالاتصال بكم عبر الرقم (${submittedQuote.phone}) خلال ساعات العمل لتنسيق المعاينة وعرض السعر.`
+                    ? `شكراً ${submittedQuote.contactPerson}. سيقوم مسؤول الحسابات التجارية في دار كلين بالاتصال بكم عبر الرقم (${submittedQuote.phone}) لتنسيق المعاينة وعرض السعر.`
                     : `Thank you, ${submittedQuote.contactPerson}. Our commercial operations team will call you at (${submittedQuote.phone}) to arrange the site visit.`}
                 </p>
               </div>
@@ -157,20 +225,22 @@ export default function CommercialQuoteView({ lang }: CommercialQuoteViewProps) 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
                 <a
                   href={`${WHATSAPP_LINK}?text=${encodeURIComponent(
-                    `مرحباً دار كلين، قدمت طلب تسعيرة تجارية برقم المرجع: ${submittedQuote.reference}`
+                    lang === 'ar'
+                      ? `مرحباً دار كلين، قدمت طلب تسعيرة تجارية ومعاينة لشركة ${submittedQuote.companyName} برقم المرجع: ${submittedQuote.reference}`
+                      : `Hello DarClean, I submitted a commercial quote request for ${submittedQuote.companyName}, Ref: ${submittedQuote.reference}`
                   )}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-6 py-3 bg-[#0B4F55] hover:bg-[#083F44] text-white font-bold rounded-xl text-xs flex items-center gap-2 transition-colors"
+                  className="w-full sm:w-auto px-6 py-3.5 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md transition-all group"
                 >
-                  <MessageCircle className="w-4 h-4" />
-                  <span>{lang === 'ar' ? 'متابعة سريعة عبر واتساب' : 'Expedite via WhatsApp'}</span>
+                  <MessageCircle className="w-5 h-5 fill-white/20 group-hover:scale-110 transition-transform" />
+                  <span>{lang === 'ar' ? 'إرسال ومتابعة الطلب عبر واتساب الآن' : 'Send & Expedite via WhatsApp Now'}</span>
                 </a>
 
                 <button
                   type="button"
                   onClick={() => setSubmittedQuote(null)}
-                  className="px-5 py-3 bg-[#F7F3EA] hover:bg-[#E5E0D5] text-[#18292C] font-semibold rounded-xl text-xs border border-[#E5E0D5] transition-colors"
+                  className="w-full sm:w-auto px-5 py-3.5 bg-[#F7F3EA] hover:bg-[#E5E0D5] text-[#18292C] font-semibold rounded-xl text-xs sm:text-sm border border-[#E5E0D5] transition-colors"
                 >
                   {lang === 'ar' ? 'تقديم طلب لفرع آخر' : 'Submit Another Request'}
                 </button>
@@ -395,20 +465,31 @@ export default function CommercialQuoteView({ lang }: CommercialQuoteViewProps) 
               </div>
 
               {/* Submit Button */}
-              <button
-                type="submit"
-                disabled={submitting}
-                className="w-full py-4 bg-[#0B4F55] hover:bg-[#083F44] disabled:bg-[#E5E0D5] text-white font-bold rounded-xl text-sm shadow transition-all flex items-center justify-center gap-2"
-              >
-                {submitting ? (
-                  <span>{lang === 'ar' ? 'جارٍ إرسال الطلب...' : 'Submitting Request...'}</span>
-                ) : (
-                  <>
-                    <span>{lang === 'ar' ? 'إرسال طلب التسعيرة والمعاينة' : 'Submit Commercial Quote Request'}</span>
-                    {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
-                  </>
-                )}
-              </button>
+              <div className="space-y-2 pt-2">
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  id="darclean-commercial-submit-btn"
+                  className="w-full py-4 bg-[#25D366] hover:bg-[#20bd5a] disabled:opacity-80 text-white font-bold rounded-2xl text-sm sm:text-base shadow-xl shadow-[#25D366]/20 transition-all flex items-center justify-center gap-3 cursor-pointer group"
+                >
+                  <MessageCircle className="w-5 h-5 fill-white/20 group-hover:scale-110 transition-transform" />
+                  {submitting ? (
+                    <span className="animate-pulse">
+                      {lang === 'ar' ? 'جارٍ فتح واتساب لإرسال الطلب...' : 'Opening WhatsApp to send request...'}
+                    </span>
+                  ) : (
+                    <>
+                      <span>{lang === 'ar' ? 'إرسال طلب المعاينة والتسعيرة عبر واتساب مباشرة' : 'Send Quote Request via WhatsApp'}</span>
+                      {isRtl ? <ArrowLeft className="w-4 h-4" /> : <ArrowRight className="w-4 h-4" />}
+                    </>
+                  )}
+                </button>
+                <p className="text-center text-[11px] text-[#5C6E71]">
+                  {lang === 'ar'
+                    ? 'سيتم فتح تطبيق واتساب فوراً لنقل كافة تفاصيل منشأتكم لمسؤول الحسابات التجارية لتنسيق المعاينة.'
+                    : 'Submitting will directly launch WhatsApp with all facility specifications for commercial review.'}
+                </p>
+              </div>
             </form>
           )}
         </div>

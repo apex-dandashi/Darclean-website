@@ -97,9 +97,22 @@ export default function BookingManagementView({ id, lang }: BookingManagementVie
       setBooking(data.booking);
       setShowReschedule(false);
       setMessage({
-        text: lang === 'ar' ? 'تم تعديل موعد الحجز بنجاح!' : 'Booking rescheduled successfully!',
+        text: lang === 'ar' ? 'تم تعديل الموعد وتوجيه التفاصيل إلى واتساب!' : 'Rescheduled and routed directly to WhatsApp!',
         type: 'success',
       });
+
+      // DIRECT SUBMISSION TO WHATSAPP
+      const rescheduleMsg = lang === 'ar'
+        ? `مرحباً دار كلين، قمت بتعديل موعد الحجز:\n📌 *رقم المرجع:* ${data.booking.reference}\n👤 *الاسم:* ${data.booking.customerName}\n📅 *الموعد الجديد:* ${newDate}\n⏰ *الفترة:* ${newTime}\n📍 *المنطقة:* ${data.booking.areaNameAr}`
+        : `Hello DarClean, I rescheduled my cleaning booking:\n📌 *Booking Ref:* ${data.booking.reference}\n👤 *Name:* ${data.booking.customerName}\n📅 *New Date:* ${newDate}\n⏰ *Time Slot:* ${newTime}\n📍 *Area:* ${data.booking.areaNameEn || data.booking.areaNameAr}`;
+
+      const waUrl = `${WHATSAPP_LINK}?text=${encodeURIComponent(rescheduleMsg)}`;
+      if (typeof window !== 'undefined') {
+        const opened = window.open(waUrl, '_blank');
+        if (!opened || opened.closed || typeof opened.closed === 'undefined') {
+          window.location.href = waUrl;
+        }
+      }
     } catch (err: any) {
       setMessage({ text: err.message || 'Error', type: 'error' });
     } finally {
@@ -131,9 +144,19 @@ export default function BookingManagementView({ id, lang }: BookingManagementVie
 
       setBooking(data.booking);
       setMessage({
-        text: lang === 'ar' ? 'تم إلغاء الحجز.' : 'Booking has been cancelled.',
+        text: lang === 'ar' ? 'تم إلغاء الحجز وتوجيه الإشعار إلى واتساب.' : 'Booking cancelled and routed to WhatsApp.',
         type: 'success',
       });
+
+      // Send cancellation notice to WhatsApp
+      const cancelMsg = lang === 'ar'
+        ? `مرحباً دار كلين، أود تأكيد إلغاء الحجز رقم ${data.booking.reference} باسم ${data.booking.customerName}.`
+        : `Hello DarClean, I would like to confirm cancellation of booking ${data.booking.reference} for ${data.booking.customerName}.`;
+
+      const waUrl = `${WHATSAPP_LINK}?text=${encodeURIComponent(cancelMsg)}`;
+      if (typeof window !== 'undefined') {
+        window.open(waUrl, '_blank');
+      }
     } catch (err: any) {
       setMessage({ text: err.message || 'Error', type: 'error' });
     } finally {
@@ -166,10 +189,23 @@ export default function BookingManagementView({ id, lang }: BookingManagementVie
       setMessage({
         text:
           lang === 'ar'
-            ? 'تم إرسال طلب إعادة التنظيف المجاني لمشرف العمليات وسنتواصل معك سريعاً.'
-            : 'Free re-clean warranty claim submitted. Operations team will contact you.',
+            ? 'تم إرسال طلب إعادة التنظيف المجاني وتوجيهه إلى واتساب لمتابعة سريعة.'
+            : 'Free re-clean warranty claim submitted and sent to WhatsApp.',
         type: 'success',
       });
+
+      // DIRECT SUBMISSION TO WHATSAPP
+      const recleanMsg = lang === 'ar'
+        ? `مرحباً دار كلين، أود تفعيل ضمان إعادة التنظيف المجاني (100% Free Re-Clean Guarantee):\n📌 *رقم المرجع:* ${data.booking.reference}\n👤 *الاسم:* ${data.booking.customerName}\n📞 *الهاتف:* ${data.booking.customerPhone}\n📝 *الملاحظات والزوايا التي تحتاج تصحيح:* ${recleanReason.trim()}`
+        : `Hello DarClean, I am requesting a free corrective re-clean under warranty:\n📌 *Booking Ref:* ${data.booking.reference}\n👤 *Name:* ${data.booking.customerName}\n📞 *Phone:* ${data.booking.customerPhone}\n📝 *Areas needing correction:* ${recleanReason.trim()}`;
+
+      const waUrl = `${WHATSAPP_LINK}?text=${encodeURIComponent(recleanMsg)}`;
+      if (typeof window !== 'undefined') {
+        const opened = window.open(waUrl, '_blank');
+        if (!opened || opened.closed || typeof opened.closed === 'undefined') {
+          window.location.href = waUrl;
+        }
+      }
     } catch (err: any) {
       setMessage({ text: err.message || 'Error', type: 'error' });
     } finally {
@@ -434,9 +470,10 @@ export default function BookingManagementView({ id, lang }: BookingManagementVie
                         <button
                           type="submit"
                           disabled={actionLoading}
-                          className="px-4 py-2 bg-[#0B4F55] text-white text-xs font-bold rounded-xl hover:bg-[#083F44] transition-colors"
+                          className="px-4 py-2 bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5 shadow"
                         >
-                          {actionLoading ? '...' : lang === 'ar' ? 'تأكيد الموعد الجديد' : 'Save New Date'}
+                          <MessageCircle className="w-3.5 h-3.5 fill-white/20" />
+                          <span>{actionLoading ? '...' : lang === 'ar' ? 'تأكيد وإرسال الموعد عبر واتساب' : 'Reschedule via WhatsApp'}</span>
                         </button>
                       </div>
                     </form>
@@ -487,9 +524,10 @@ export default function BookingManagementView({ id, lang }: BookingManagementVie
                         <button
                           type="submit"
                           disabled={actionLoading}
-                          className="px-4 py-2 bg-[#0B4F55] text-white text-xs font-bold rounded-xl hover:bg-[#083F44] transition-colors"
+                          className="px-4 py-2 bg-[#25D366] hover:bg-[#20bd5a] text-white text-xs font-bold rounded-xl transition-colors flex items-center gap-1.5 shadow"
                         >
-                          {actionLoading ? '...' : lang === 'ar' ? 'إرسال طلب الضمان' : 'Submit Re-clean'}
+                          <MessageCircle className="w-3.5 h-3.5 fill-white/20" />
+                          <span>{actionLoading ? '...' : lang === 'ar' ? 'إرسال طلب الضمان عبر واتساب' : 'Submit Claim via WhatsApp'}</span>
                         </button>
                       </div>
                     </form>

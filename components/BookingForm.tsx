@@ -224,25 +224,103 @@ export default function BookingForm({
         photoUrls: photoPreviews,
       };
 
-      const res = await fetch('/api/bookings', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
+      let bookingResult: any = null;
 
-      if (!res.ok) {
-        throw new Error('Failed to create booking');
+      try {
+        const res = await fetch('/api/bookings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          bookingResult = data.booking;
+        }
+      } catch (networkErr) {
+        console.warn('Network issue saving booking to server, continuing directly via WhatsApp:', networkErr);
       }
 
-      const data = await res.json();
-      setConfirmedBooking(data.booking);
+      // If backend didn't respond, provide local fallback structure so user is NEVER blocked
+      if (!bookingResult) {
+        const fallbackRef = `DC-${Math.floor(10000 + Math.random() * 90000)}`;
+        bookingResult = {
+          id: `local-${Date.now()}`,
+          reference: fallbackRef,
+          ...payload,
+          status: 'new',
+          managementToken: 'direct',
+        };
+      }
+
+      setConfirmedBooking(bookingResult);
+
+      // Build rich, complete WhatsApp message with all submitted details
+      const isAr = lang === 'ar';
+      const serviceName = SERVICE_TYPE_LABELS[serviceType]?.[isAr ? 'ar' : 'en'] || serviceType;
+      const paymentText = paymentMethod === 'cash' 
+        ? (isAr ? 'نقداً بالدولار عند الانتهاء (Cash)' : 'Cash in USD on completion')
+        : 'Whish Money (وش موني)';
+
+      const extrasNames = selectedExtras.length > 0
+        ? selectedExtras.map(id => EXTRAS_CATALOG.find(e => e.id === id)?.[isAr ? 'nameAr' : 'nameEn']).filter(Boolean).join('، ')
+        : (isAr ? 'لا يوجد' : 'None');
+
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://darclean.pro';
+      const manageLink = bookingResult.managementToken && bookingResult.managementToken !== 'direct'
+        ? `${origin}/${lang}/manage/${bookingResult.id}?token=${bookingResult.managementToken}`
+        : null;
+
+      let msg = '';
+      if (isAr) {
+        msg = `مرحباً دار كلين، أود تأكيد وإرسال حجز خدمة تنظيف جديدة:
+📌 *رقم المرجع:* ${bookingResult.reference}
+👤 *الاسم:* ${customerName.trim()}
+📞 *رقم الهاتف:* ${customerPhone.trim()}
+🧹 *نوع الخدمة:* ${serviceName}
+👥 *طاقم العمل:* ${cleanersCount} عمال × ${validHours} ساعات ($10/ساعة)
+📍 *المنطقة:* ${selectedArea.nameAr}
+🏠 *العنوان بالتفصيل:* ${addressDetails.trim()}${building.trim() ? ` - بناء: ${building.trim()}` : ''}${floor.trim() ? ` - طابق: ${floor.trim()}` : ''}${landmark.trim() ? ` (علامة مميزة: ${landmark.trim()})` : ''}
+📅 *تاريخ الحجز:* ${serviceDate}
+⏰ *الفترة الزمنية:* ${timeSlot}
+✨ *الخدمات الإضافية:* ${extrasNames}
+💵 *طريقة الدفع:* ${paymentText}
+💰 *السعر النهائي المؤكد:* $${totalPrice} USD (شامل التنقل ومواد التنظيف المعتمدة)${customerNotes.trim() ? `\n📝 *ملاحظات خاصة:* ${customerNotes.trim()}` : ''}${manageLink ? `\n🔗 *رابط إدارة الحجز:* ${manageLink}` : ''}`;
+      } else {
+        msg = `Hello DarClean, I would like to confirm a new cleaning booking:
+📌 *Booking Ref:* ${bookingResult.reference}
+👤 *Name:* ${customerName.trim()}
+📞 *Phone:* ${customerPhone.trim()}
+🧹 *Service:* ${serviceName}
+👥 *Team:* ${cleanersCount} cleaner(s) × ${validHours} hours ($10/hr)
+📍 *Area:* ${selectedArea.nameEn}
+🏠 *Address:* ${addressDetails.trim()}${building.trim() ? ` - Building: ${building.trim()}` : ''}${floor.trim() ? ` - Floor: ${floor.trim()}` : ''}${landmark.trim() ? ` (Landmark: ${landmark.trim()})` : ''}
+📅 *Date:* ${serviceDate}
+⏰ *Time Slot:* ${timeSlot}
+✨ *Extras:* ${extrasNames}
+💵 *Payment Method:* ${paymentText}
+💰 *Total Confirmed Rate:* $${totalPrice} USD (Supplies & transport included)${customerNotes.trim() ? `\n📝 *Notes:* ${customerNotes.trim()}` : ''}${manageLink ? `\n🔗 *Management Link:* ${manageLink}` : ''}`;
+      }
+
+      const directWaUrl = `${WHATSAPP_LINK}?text=${encodeURIComponent(msg)}`;
+
+      // DIRECT SUBMISSION TO WHATSAPP
+      if (typeof window !== 'undefined') {
+        const opened = window.open(directWaUrl, '_blank');
+        if (!opened || opened.closed || typeof opened.closed === 'undefined') {
+          window.location.href = directWaUrl;
+        }
+      }
     } catch (err: any) {
       console.error('Booking submission error:', err);
-      setErrorMsg(
-        lang === 'ar'
-          ? 'حدث خطأ أثناء إرسال الحجز. يرجى المحاولة مرة أخرى أو التواصل معنا عبر واتساب مباشرة.'
-          : 'Error submitting booking. Please try again or reach out on WhatsApp.'
-      );
+      // Fallback: still redirect directly to WhatsApp with whatever the customer entered!
+      const fallbackMsg = lang === 'ar'
+        ? `مرحباً دار كلين، أود تأكيد حجز خدمة تنظيف:\n- الاسم: ${customerName.trim()}\n- الهاتف: ${customerPhone.trim()}\n- المنطقة: ${selectedArea.nameAr}\n- العنوان: ${addressDetails.trim()}\n- الموعد: ${serviceDate} (${timeSlot})\n- السعر: $${totalPrice} USD`
+        : `Hello DarClean, I would like to book a cleaning service:\n- Name: ${customerName.trim()}\n- Phone: ${customerPhone.trim()}\n- Area: ${selectedArea.nameEn}\n- Address: ${addressDetails.trim()}\n- Date: ${serviceDate} (${timeSlot})\n- Total: $${totalPrice} USD`;
+      
+      if (typeof window !== 'undefined') {
+        window.location.href = `${WHATSAPP_LINK}?text=${encodeURIComponent(fallbackMsg)}`;
+      }
     } finally {
       setSubmitting(false);
     }
@@ -250,16 +328,68 @@ export default function BookingForm({
 
   // If booking is confirmed, display full confirmation screen
   if (confirmedBooking) {
+    const isAr = lang === 'ar';
     const managementUrl = `${typeof window !== 'undefined' ? window.location.origin : ''}/${lang}/manage/${confirmedBooking.id}?token=${confirmedBooking.managementToken}`;
 
-    const whatsappMessage = encodeURIComponent(
-      `مرحباً دار كلين، قمت بحجز خدمة تنظيف:\n- رقم المرجع: ${confirmedBooking.reference}\n- الاسم: ${confirmedBooking.customerName}\n- المنطقة: ${confirmedBooking.areaNameAr}\n- الموعد: ${confirmedBooking.serviceDate} (${confirmedBooking.timeSlot})\n- السعر النهائي المؤكد: $${confirmedBooking.totalPrice}\n- الدفع: ${confirmedBooking.paymentMethod === 'cash' ? 'نقداً' : 'Whish Money'}`
-    );
+    const serviceName = SERVICE_TYPE_LABELS[confirmedBooking.serviceType]?.[isAr ? 'ar' : 'en'] || confirmedBooking.serviceType;
+    const paymentText = confirmedBooking.paymentMethod === 'cash' 
+      ? (isAr ? 'نقداً بالدولار عند الانتهاء (Cash)' : 'Cash in USD on completion')
+      : 'Whish Money (وش موني)';
 
-    const directWaUrl = `https://wa.me/96176408309?text=${whatsappMessage}`;
+    const extrasNames = confirmedBooking.selectedExtras && confirmedBooking.selectedExtras.length > 0
+      ? confirmedBooking.selectedExtras.map((id: string) => EXTRAS_CATALOG.find(e => e.id === id)?.[isAr ? 'nameAr' : 'nameEn']).filter(Boolean).join('، ')
+      : (isAr ? 'لا يوجد' : 'None');
+
+    let confirmationMsg = '';
+    if (isAr) {
+      confirmationMsg = `مرحباً دار كلين، أود تأكيد حجز خدمة تنظيف:
+📌 *رقم المرجع:* ${confirmedBooking.reference}
+👤 *الاسم:* ${confirmedBooking.customerName}
+📞 *رقم الهاتف:* ${confirmedBooking.customerPhone}
+🧹 *نوع الخدمة:* ${serviceName}
+👥 *طاقم العمل:* ${confirmedBooking.cleanersCount} عمال × ${confirmedBooking.estimatedHours} ساعات ($10/ساعة)
+📍 *المنطقة:* ${confirmedBooking.areaNameAr}
+🏠 *العنوان:* ${confirmedBooking.addressDetails}${confirmedBooking.building ? ` - بناء: ${confirmedBooking.building}` : ''}${confirmedBooking.floor ? ` - طابق: ${confirmedBooking.floor}` : ''}${confirmedBooking.landmark ? ` (${confirmedBooking.landmark})` : ''}
+📅 *الموعد:* ${confirmedBooking.serviceDate} (${confirmedBooking.timeSlot})
+✨ *الخدمات الإضافية:* ${extrasNames}
+💵 *طريقة الدفع:* ${paymentText}
+💰 *السعر النهائي المؤكد:* $${confirmedBooking.totalPrice} USD
+🔗 *رابط المتابعة والإدارة:* ${managementUrl}`;
+    } else {
+      confirmationMsg = `Hello DarClean, I would like to confirm my cleaning booking:
+📌 *Booking Ref:* ${confirmedBooking.reference}
+👤 *Name:* ${confirmedBooking.customerName}
+📞 *Phone:* ${confirmedBooking.customerPhone}
+🧹 *Service:* ${serviceName}
+👥 *Team:* ${confirmedBooking.cleanersCount} cleaners × ${confirmedBooking.estimatedHours} hours ($10/hr)
+📍 *Area:* ${confirmedBooking.areaNameEn || confirmedBooking.areaNameAr}
+🏠 *Address:* ${confirmedBooking.addressDetails}
+📅 *Date:* ${confirmedBooking.serviceDate} (${confirmedBooking.timeSlot})
+✨ *Extras:* ${extrasNames}
+💵 *Payment:* ${paymentText}
+💰 *Confirmed Total:* $${confirmedBooking.totalPrice} USD
+🔗 *Management Link:* ${managementUrl}`;
+    }
+
+    const directWaUrl = `${WHATSAPP_LINK}?text=${encodeURIComponent(confirmationMsg)}`;
 
     return (
       <div className="bg-white rounded-3xl shadow-xl shadow-[#0B4F55]/5 border border-[#E5E0D5] p-6 sm:p-10 max-w-3xl mx-auto my-8 animate-in fade-in text-[#18292C]">
+        {/* Status Notice */}
+        <div className="mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-start gap-3">
+          <MessageCircle className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+          <div className="text-xs sm:text-sm">
+            <span className="font-bold block">
+              {lang === 'ar' ? 'تم تجهيز وتوجيه الحجز مباشرة إلى واتساب' : 'Booking directly routed to WhatsApp!'}
+            </span>
+            <p className="text-emerald-700 mt-0.5">
+              {lang === 'ar'
+                ? 'إذا لم تفتح محادثة واتساب تلقائياً، يرجى الضغط على الزر الأخضر بالأسفل لإرسال التفاصيل فوراً.'
+                : 'If WhatsApp did not launch automatically, tap the green button below to send your details.'}
+            </p>
+          </div>
+        </div>
+
         <div className="text-center pb-8 border-b border-[#E5E0D5]">
           <div className="w-16 h-16 bg-[#0B4F55]/10 text-[#0B4F55] rounded-full flex items-center justify-center mx-auto mb-4">
             <CheckCircle2 className="w-9 h-9" />
@@ -359,14 +489,14 @@ export default function BookingForm({
             target="_blank"
             rel="noopener noreferrer"
             id="confirmation-whatsapp-send-btn"
-            className="w-full sm:flex-1 py-3 px-4 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-all"
+            className="w-full sm:flex-1 py-3.5 px-5 bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-md transition-all text-sm group"
           >
-            <MessageCircle className="w-5 h-5 fill-white/20" />
-            {lang === 'ar' ? 'تأكيد الحجز فوراً عبر واتساب' : 'Confirm via WhatsApp Now'}
+            <MessageCircle className="w-5 h-5 fill-white/20 group-hover:scale-110 transition-transform" />
+            <span>{lang === 'ar' ? 'إرسال الحجز عبر واتساب الآن (إعادة الفتح)' : 'Send via WhatsApp Now (Reopen)'}</span>
           </a>
           <button
             onClick={() => router.push(`/${lang}/manage/${confirmedBooking.id}?token=${confirmedBooking.managementToken}`)}
-            className="w-full sm:w-auto py-3 px-5 bg-[#F7F3EA] hover:bg-[#ECE6D8] text-[#18292C] font-bold rounded-xl text-sm border border-[#E5E0D5] transition-colors"
+            className="w-full sm:w-auto py-3.5 px-5 bg-[#F7F3EA] hover:bg-[#ECE6D8] text-[#18292C] font-bold rounded-xl text-xs sm:text-sm border border-[#E5E0D5] transition-colors"
           >
             {lang === 'ar' ? 'عرض تفاصيل الحجز' : 'View Booking Details'}
           </button>
@@ -1111,26 +1241,44 @@ export default function BookingForm({
 
         {/* Submit CTA */}
         <div className="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="text-xs text-[#A4B2B4]">
-            {lang === 'ar'
-              ? 'بالضغط على تأكيد الحجز، يتم حفظ السعر وتوليد رابط إدارة خاص بحجزك.'
-              : 'By clicking submit, your confirmed rate is locked and a private link is generated.'}
+          <div className="text-xs text-[#A4B2B4] space-y-1">
+            <div className="flex items-center gap-1.5 text-emerald-400 font-semibold">
+              <MessageCircle className="w-4 h-4" />
+              <span>
+                {lang === 'ar'
+                  ? 'يتم إرسال كافة تفاصيل الحجز مباشرة عبر تطبيق واتساب'
+                  : 'All booking details are transmitted directly via WhatsApp'}
+              </span>
+            </div>
+            <p>
+              {lang === 'ar'
+                ? 'يتم حفظ السعر وتوليد رابط إدارة خاص بحجزك مع فتح محادثة واتساب فوراً.'
+                : 'Locks your confirmed rate, generates private link & opens WhatsApp chat instantly.'}
+            </p>
           </div>
 
           <button
             type="submit"
             disabled={submitting}
             id="darclean-submit-booking-btn"
-            className="w-full sm:w-auto px-8 py-4 bg-[#0B4F55] hover:bg-[#083F44] disabled:bg-[#083F44] text-white font-bold text-base rounded-xl shadow-lg shadow-[#0B4F55]/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full sm:w-auto px-7 py-3.5 bg-[#25D366] hover:bg-[#20bd5a] disabled:opacity-80 text-white font-bold text-sm sm:text-base rounded-2xl shadow-xl shadow-[#25D366]/25 transition-all flex items-center justify-center gap-3 cursor-pointer group"
           >
+            <MessageCircle className="w-5 h-5 fill-white/20 flex-shrink-0 group-hover:scale-110 transition-transform" />
             {submitting ? (
-              <span className="animate-pulse">{lang === 'ar' ? 'جاري تثبيت الحجز...' : 'Processing...'}</span>
+              <span className="animate-pulse">
+                {lang === 'ar' ? 'جاري فتح واتساب لإرسال الحجز...' : 'Opening WhatsApp to send booking...'}
+              </span>
             ) : (
-              <>
-                <span>{lang === 'ar' ? 'تأكيد الحجز بالسعر النهائي ($' + totalPrice + ')' : `Confirm Booking ($${totalPrice})`}</span>
-                {isRtl ? <ArrowLeft className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
-              </>
+              <div className="text-start">
+                <span className="block font-black">
+                  {lang === 'ar' ? `تأكيد وإرسال الحجز عبر واتساب ($${totalPrice})` : `Confirm & Send via WhatsApp ($${totalPrice})`}
+                </span>
+                <span className="block text-[11px] font-normal text-white/90">
+                  {lang === 'ar' ? 'يفتح محادثة واتساب فوراً مع تفاصيل الحجز' : 'Opens WhatsApp with pre-filled booking details'}
+                </span>
+              </div>
             )}
+            {!submitting && (isRtl ? <ArrowLeft className="w-4 h-4 flex-shrink-0" /> : <ArrowRight className="w-4 h-4 flex-shrink-0" />)}
           </button>
         </div>
       </section>
