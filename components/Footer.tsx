@@ -15,6 +15,7 @@ import {
   Globe
 } from 'lucide-react';
 import Logo from './Logo';
+import MobileQuickActionDock from './MobileQuickActionDock';
 import { Language } from '@/lib/types';
 import { DICTIONARY, WHATSAPP_LINK, WHATSAPP_NUMBER } from '@/lib/i18n';
 
@@ -42,9 +43,10 @@ export default function Footer({ lang }: FooterProps) {
   const altLangLabel = lang === 'ar' ? 'Switch to English' : 'التحويل إلى العربية';
 
   return (
-    <footer className="bg-[#0B4F55] text-[#F7F3EA] pt-14 pb-8 border-t border-[#083F44]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-12 border-b border-[#083F44]/80">
+    <>
+      <footer className="bg-[#0B4F55] text-[#F7F3EA] pt-14 pb-24 sm:pb-8 border-t border-[#083F44]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 pb-12 border-b border-[#083F44]/80">
           {/* Brand & Mission Column */}
           <div className="lg:col-span-2 space-y-4">
             {/* Approved White Logo in Footer */}
@@ -261,5 +263,9 @@ export default function Footer({ lang }: FooterProps) {
         </div>
       </div>
     </footer>
-  );
+
+    {/* Floating Mobile Quick-Action Dock (WhatsApp, Calculator, Call) */}
+    <MobileQuickActionDock lang={lang} />
+  </>
+);
 }

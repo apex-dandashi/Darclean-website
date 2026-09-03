@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
@@ -94,7 +94,7 @@ export default function AdminPage() {
     };
   };
 
-  const loadData = async (token?: string) => {
+  const loadData = useCallback(async (token?: string) => {
     const activeToken = token || authToken;
     if (!activeToken) return;
 
@@ -140,7 +140,7 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authToken]);
 
   const handleLogout = async () => {
     const supabase = getSupabaseBrowserClient();
@@ -214,7 +214,7 @@ export default function AdminPage() {
     return () => {
       mounted = false;
     };
-  }, [router]);
+  }, [router, loadData]);
 
   const handleUpdateBooking = async (id: string, updates: Partial<Booking>) => {
     try {

@@ -103,6 +103,36 @@ export const DEFAULT_SERVICE_AREAS: ServiceArea[] = [
     notesAr: 'رسم انتقال وتوصيل: 5$',
     notesEn: 'Crew & equipment transport surcharge: $5',
   },
+  {
+    id: 'minieh',
+    nameAr: 'المنية ودير عمار وبحنين',
+    nameEn: 'Minieh, Deir Ammar & Bhanine',
+    isInsideTripoli: false,
+    travelChargeUsd: 5,
+    available: true,
+    notesAr: 'رسم انتقال وتوصيل: 5$',
+    notesEn: 'Crew & equipment transport surcharge: $5',
+  },
+  {
+    id: 'koura_deep',
+    nameAr: 'الكورة (أميون، كوسبا، كفرعقا)',
+    nameEn: 'Koura (Amioun, Kousba, Kfaraakka)',
+    isInsideTripoli: false,
+    travelChargeUsd: 6,
+    available: true,
+    notesAr: 'رسم انتقال وتوصيل: 6$',
+    notesEn: 'Crew & equipment transport surcharge: $6',
+  },
+  {
+    id: 'chekka',
+    nameAr: 'شكا وأنفه',
+    nameEn: 'Chekka & Enfeh',
+    isInsideTripoli: false,
+    travelChargeUsd: 7,
+    available: true,
+    notesAr: 'رسم انتقال وتوصيل: 7$',
+    notesEn: 'Crew & equipment transport surcharge: $7',
+  },
 ];
 
 export const DEFAULT_STAFF: StaffMember[] = [];

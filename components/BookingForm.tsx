@@ -21,7 +21,9 @@ import {
   CreditCard,
   MessageCircle,
   Copy,
-  Check
+  Check,
+  Plus,
+  Minus
 } from 'lucide-react';
 import { 
   Booking, 
@@ -58,8 +60,20 @@ export default function BookingForm({
 
   // Form State
   const [category, setCategory] = useState<ServiceCategory>(preselectedCategory);
-  const [serviceType, setServiceType] = useState<ServiceType>(preselectedService);
-  const [areaId, setAreaId] = useState<string>('tripoli_central');
+  const [serviceType, setServiceType] = useState<ServiceType>(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search).get('tier');
+      if (p === 'deep') return 'deep_home';
+    }
+    return preselectedService;
+  });
+  const [areaId, setAreaId] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search).get('area');
+      if (p && DEFAULT_SERVICE_AREAS.some((a) => a.id === p)) return p;
+    }
+    return 'tripoli_central';
+  });
   const [addressDetails, setAddressDetails] = useState('');
   const [building, setBuilding] = useState('');
   const [floor, setFloor] = useState('');
@@ -70,9 +84,23 @@ export default function BookingForm({
   const [serviceDate, setServiceDate] = useState(() => new Date(Date.now() + 86400000).toISOString().split('T')[0]);
   const [timeSlot, setTimeSlot] = useState('09:00 - 12:00 (صباحاً / Morning)');
 
-  // Cleaners & Hours (enforce min 2 hours per cleaner!)
-  const [cleanersCount, setCleanersCount] = useState<number>(1);
-  const [estimatedHours, setEstimatedHours] = useState<number>(3); // default 3 hrs
+  // Cleaners & Hours (enforce min 2 hours per cleaner, with lazy query param initialization)
+  const [cleanersCount, setCleanersCount] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search).get('cleaners');
+      const val = p ? parseInt(p, 10) : NaN;
+      if (!isNaN(val) && val >= 1 && val <= 20) return val;
+    }
+    return 1;
+  });
+  const [estimatedHours, setEstimatedHours] = useState<number>(() => {
+    if (typeof window !== 'undefined') {
+      const p = new URLSearchParams(window.location.search).get('hours');
+      const val = p ? parseInt(p, 10) : NaN;
+      if (!isNaN(val) && val >= 2 && val <= 16) return val;
+    }
+    return 3;
+  });
 
   // Extras & Preferences
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
@@ -597,24 +625,45 @@ export default function BookingForm({
             </select>
           </div>
 
-          {/* Cleaners Count Selector */}
-          <div className="p-4 bg-[#F7F3EA] rounded-2xl border border-[#E5E0D5]">
-            <label className="block text-xs font-bold text-[#0B4F55] uppercase tracking-wider mb-2 flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
+          {/* Cleaners Count Selector with Stepper & Flexible Scale */}
+          <div className="p-4 bg-[#F7F3EA] rounded-2xl border border-[#E5E0D5] space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-[#0B4F55] uppercase tracking-wider flex items-center gap-1.5">
                 <Users className="w-4 h-4 text-[#0B4F55]" />
-                {lang === 'ar' ? 'عدد عمال النظافة:' : 'Number of Cleaners:'}
-              </span>
-              <span className="text-[#0B4F55] font-bold text-sm">
-                {cleanersCount} {lang === 'ar' ? 'عامل / عاملة' : 'cleaners'}
-              </span>
-            </label>
-            <div className="flex items-center gap-2">
-              {[1, 2, 3, 4].map((num) => (
+                <span>{lang === 'ar' ? 'عدد عمال النظافة:' : 'Number of Cleaners:'}</span>
+              </label>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setCleanersCount((prev) => Math.max(1, prev - 1))}
+                  disabled={cleanersCount <= 1}
+                  className="w-7 h-7 rounded-lg border border-[#E5E0D5] bg-white text-[#0B4F55] hover:bg-[#ECE6D8] disabled:opacity-40 flex items-center justify-center font-bold"
+                  aria-label="Decrease cleaners"
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+                <span className="text-[#0B4F55] font-extrabold text-sm min-w-16 text-center">
+                  {cleanersCount} {lang === 'ar' ? 'عمال' : 'cleaners'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setCleanersCount((prev) => Math.min(15, prev + 1))}
+                  disabled={cleanersCount >= 15}
+                  className="w-7 h-7 rounded-lg border border-[#E5E0D5] bg-white text-[#0B4F55] hover:bg-[#ECE6D8] disabled:opacity-40 flex items-center justify-center font-bold"
+                  aria-label="Increase cleaners"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-8 gap-1 sm:gap-1.5">
+              {[1, 2, 3, 4, 5, 6, 8, 10].map((num) => (
                 <button
                   type="button"
                   key={num}
                   onClick={() => setCleanersCount(num)}
-                  className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer ${
+                  className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     cleanersCount === num
                       ? 'bg-[#0B4F55] text-white shadow-sm'
                       : 'bg-white border border-[#E5E0D5] text-[#18292C] hover:bg-[#ECE6D8]'
@@ -624,31 +673,60 @@ export default function BookingForm({
                 </button>
               ))}
             </div>
-            <p className="text-[11px] text-[#5C6E71] mt-2">
+            {cleanersCount >= 5 && (
+              <p className="text-[11px] text-[#0B4F55] font-semibold flex items-center gap-1">
+                <Sparkles className="w-3.5 h-3.5 text-[#49C7B5]" />
+                {lang === 'ar'
+                  ? 'طاقم عمل كامل مخصص للمساحات الكبيرة والفلل والشركات'
+                  : 'Full crew tier assigned for large villas and commercial facilities'}
+              </p>
+            )}
+            <p className="text-[11px] text-[#5C6E71]">
               {lang === 'ar'
                 ? 'فريق عمل مختلط يرتدي الزي الرسمي وبطاقات التعريف'
                 : 'Uniformed male & female staff carrying company ID cards'}
             </p>
           </div>
 
-          {/* Estimated Hours (with strict 2-hour minimum enforcement) */}
-          <div className="p-4 bg-[#F7F3EA] rounded-2xl border border-[#E5E0D5]">
-            <label className="block text-xs font-bold text-[#0B4F55] uppercase tracking-wider mb-2 flex items-center justify-between">
-              <span className="flex items-center gap-1.5">
+          {/* Estimated Hours (with strict 2-hour minimum enforcement & extended scale) */}
+          <div className="p-4 bg-[#F7F3EA] rounded-2xl border border-[#E5E0D5] space-y-2">
+            <div className="flex items-center justify-between">
+              <label className="text-xs font-bold text-[#0B4F55] uppercase tracking-wider flex items-center gap-1.5">
                 <Clock className="w-4 h-4 text-[#0B4F55]" />
-                {lang === 'ar' ? 'عدد الساعات المقدرة:' : 'Estimated Hours:'}
-              </span>
-              <span className="text-[#0B4F55] font-bold text-sm">
-                {validHours} {lang === 'ar' ? 'ساعات' : 'hours'}
-              </span>
-            </label>
-            <div className="flex items-center gap-2">
-              {[2, 3, 4, 5, 6].map((hrs) => (
+                <span>{lang === 'ar' ? 'الساعات لكل عامل:' : 'Hours per cleaner:'}</span>
+              </label>
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => setEstimatedHours((prev) => Math.max(2, prev - 1))}
+                  disabled={validHours <= 2}
+                  className="w-7 h-7 rounded-lg border border-[#E5E0D5] bg-white text-[#0B4F55] hover:bg-[#ECE6D8] disabled:opacity-40 flex items-center justify-center font-bold"
+                  aria-label="Decrease hours"
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+                <span className="text-[#0B4F55] font-extrabold text-sm min-w-16 text-center">
+                  {validHours} {lang === 'ar' ? 'ساعات' : 'hours'}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setEstimatedHours((prev) => Math.min(12, prev + 1))}
+                  disabled={validHours >= 12}
+                  className="w-7 h-7 rounded-lg border border-[#E5E0D5] bg-white text-[#0B4F55] hover:bg-[#ECE6D8] disabled:opacity-40 flex items-center justify-center font-bold"
+                  aria-label="Increase hours"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-8 gap-1 sm:gap-1.5">
+              {[2, 3, 4, 5, 6, 8, 10, 12].map((hrs) => (
                 <button
                   type="button"
                   key={hrs}
                   onClick={() => setEstimatedHours(hrs)}
-                  className={`flex-1 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer ${
+                  className={`py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                     validHours === hrs
                       ? 'bg-[#0B4F55] text-white shadow-sm'
                       : 'bg-white border border-[#E5E0D5] text-[#18292C] hover:bg-[#ECE6D8]'
@@ -658,12 +736,19 @@ export default function BookingForm({
                 </button>
               ))}
             </div>
-            <p className="text-[11px] text-[#0B4F55] font-semibold mt-2 flex items-center gap-1">
-              <AlertCircle className="w-3 h-3 text-[#0B4F55]" />
-              {lang === 'ar'
-                ? 'الحد الأدنى للتنظيف هو ساعتان لكل عامل لضمان الجودة'
-                : '2-hour minimum per cleaner is strictly enforced for quality'}
-            </p>
+            <div className="flex justify-between items-center text-[11px] text-[#0B4F55] font-semibold">
+              <span className="flex items-center gap-1">
+                <AlertCircle className="w-3 h-3 text-[#0B4F55]" />
+                {lang === 'ar'
+                  ? 'الحد الأدنى ساعتان لكل عامل لضمان الجودة'
+                  : '2-hour minimum per cleaner is enforced'}
+              </span>
+              <span>
+                {lang === 'ar'
+                  ? `إجمالي ساعات العمل: ${cleanersCount * validHours} س`
+                  : `Total crew work: ${cleanersCount * validHours} hrs`}
+              </span>
+            </div>
           </div>
         </div>
 
@@ -796,6 +881,7 @@ export default function BookingForm({
             <div className="flex items-center gap-2 mt-3 flex-wrap">
               {photoPreviews.map((src, idx) => (
                 <div key={idx} className="relative w-16 h-16 rounded-xl overflow-hidden border border-[#E5E0D5]">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={src} alt="Preview" className="w-full h-full object-cover" />
                 </div>
               ))}

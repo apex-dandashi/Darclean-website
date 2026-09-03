@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { 
@@ -51,7 +51,7 @@ export default function StaffPage() {
     client_inspection: false,
   });
 
-  const fetchJobs = async (token?: string) => {
+  const fetchJobs = useCallback(async (token?: string) => {
     const activeToken = token || authToken;
     if (!activeToken) return;
 
@@ -69,7 +69,7 @@ export default function StaffPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [authToken]);
 
   // Verify session on mount
   useEffect(() => {
@@ -123,7 +123,7 @@ export default function StaffPage() {
     return () => {
       mounted = false;
     };
-  }, [router]);
+  }, [router, fetchJobs]);
 
   const handleUpdateStatus = async (jobId: string, newStatus: string) => {
     if (!authToken) return;

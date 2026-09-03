@@ -24,9 +24,13 @@ import {
   IdCard,
   Sparkle,
   Briefcase,
-  ChevronDown
+  ChevronDown,
+  Plus,
+  Minus,
+  Truck
 } from 'lucide-react';
-import { Language } from '@/lib/types';
+import { Language, ServiceArea } from '@/lib/types';
+import { DEFAULT_SERVICE_AREAS } from '@/lib/db';
 import { DICTIONARY, SERVICE_TYPE_LABELS, WHATSAPP_LINK, WHATSAPP_NUMBER } from '@/lib/i18n';
 import Navbar from './Navbar';
 import Footer from './Footer';
@@ -54,15 +58,18 @@ function WhatsAppIcon({ className = 'w-5 h-5' }: { className?: string }) {
 export default function HomePageView({ lang }: HomePageViewProps) {
   const isRtl = lang === 'ar';
 
-  // Interactive Live Price Estimator state
-  const [cleaners, setCleaners] = useState(1);
+  // Interactive Live Price Estimator state (Comprehensive: flexible cleaners 1-15, hours 2-12, specific area pricing)
+  const [cleaners, setCleaners] = useState(2);
   const [hours, setHours] = useState(3);
-  const [areaRange, setAreaRange] = useState<'inside' | 'outside'>('inside');
+  const [selectedAreaId, setSelectedAreaId] = useState('dam_w_farez');
+  const [serviceTier, setServiceTier] = useState<'standard' | 'deep'>('standard');
 
   // Enforce 2-hour minimum per cleaner
   const effectiveHours = Math.max(2, hours);
-  const basePrice = cleaners * effectiveHours * 10;
-  const travelCost = areaRange === 'inside' ? 0 : 3;
+  const hourlyRate = serviceTier === 'deep' ? 12 : 10;
+  const basePrice = cleaners * effectiveHours * hourlyRate;
+  const activeArea = DEFAULT_SERVICE_AREAS.find((a) => a.id === selectedAreaId) || DEFAULT_SERVICE_AREAS[0];
+  const travelCost = activeArea.travelChargeUsd;
   const estimatedTotal = basePrice + travelCost;
 
   // FAQ Accordion state
@@ -137,30 +144,30 @@ export default function HomePageView({ lang }: HomePageViewProps) {
   const localReviews = [
     {
       id: '1',
-      author: lang === 'ar' ? 'السيدة ليلى ح.' : 'Layla H.',
+      author: lang === 'ar' ? 'الست ليلى ح.' : 'Layla H.',
       area: lang === 'ar' ? 'طرابلس - ضم وفرز' : 'Tripoli - Dam w Farez',
       text: lang === 'ar' 
-        ? 'تجربة ممتازة جداً. الطاقم كان بالزي الرسمي ويحملون بطاقاتهم، ونظافة البيت من أروع ما يكون. الالتزام بالوقت كان دقيقاً.'
-        : 'Outstanding service. The team arrived in uniform with ID cards, and the apartment was spotless. Truly punctual and trustworthy.',
-      service: lang === 'ar' ? 'تنظيف منزلي شامل' : 'Deep Home Cleaning'
+        ? 'بصراحة شغل بيبيّض الوش! إجو عالوقت بالدقيقة، باليونيفورم والبطاقات، ونظفوا البيت من قلب ورب، حتى الزوايا اللي بالعادة بتنتسى فركوها فرك. ريّحونا ع الآخر الله يعطيهن العافية.'
+        : 'Truly exceptional work! Arrived right on the dot in uniform with IDs, and cleaned the entire apartment with utmost dedication. Highly recommend them.',
+      service: lang === 'ar' ? 'شغل بيت شامل' : 'Deep Home Cleaning'
     },
     {
       id: '2',
       author: lang === 'ar' ? 'المهندس كريم ط.' : 'Karim T.',
-      area: lang === 'ar' ? 'الميناء' : 'Al-Mina, Tripoli',
+      area: lang === 'ar' ? 'الميناء - شارع المدارس' : 'Al-Mina, Tripoli',
       text: lang === 'ar'
-        ? 'تسعيرهم واضح من البداية 10$ للساعة لكل عامل بدون أي مفاجآت، ومواد التنظيف معهم. دفعنا Whish موني بكل سلاسة.'
-        : 'Transparent $10/hour rate with cleaning supplies included, no awkward surprises. Smooth payment via Whish Money.',
-      service: lang === 'ar' ? 'تنظيف شقة أسبوعي' : 'Weekly Residential Cleaning'
+        ? 'أحلى شي عند دار كلين إنو ما في لف ودوران بالحساب؛ قايليلي 10$ ع الساعة لكل عامل وإجو جايبين دوا التنظيف ومماسحهن معهن. حوّلتلن وش موني بدقيقة وخلصت القصة بدون وجعة راس.'
+        : 'Straightforward upfront pricing: $10/hour per cleaner with detergents and gear provided. Smooth payment via Whish Money without any hassle.',
+      service: lang === 'ar' ? 'تنظيف دوري للشقة' : 'Weekly Residential Cleaning'
     },
     {
       id: '3',
       author: lang === 'ar' ? 'مكتب استشارات ن.' : 'Consultancy Firm N.',
-      area: lang === 'ar' ? 'طرابلس - المعرض' : 'Tripoli - Maarad',
+      area: lang === 'ar' ? 'طرابلس - شارع المعرض' : 'Tripoli - Maarad',
       text: lang === 'ar'
-        ? 'تعاقدنا مع دار كلين لتنظيف مكاتب الشركة أسبوعياً. الترتيب والسرية والاحترافية عالية، وضمان إعادة التنظيف يعطي ثقة تامة.'
-        : 'Contracted DarClean for weekly office maintenance. Discretion, speed, and professionalism are top tier.',
-      service: lang === 'ar' ? 'تنظيف مكاتب تجارية' : 'Commercial Office Cleaning'
+        ? 'متعاقدين معهن لمكاتبنا بالمعرض أسبوعياً. شباب وصبايا أمانة وأدب وشغل ع السكت، وضمانة إعادة التنظيف بتخلي الواحد مرتاح ومطمّن ع مكتبه وشغله.'
+        : 'We contract DarClean weekly for our office on Maarad Street. Trustworthy, discreet, meticulous, and their re-clean guarantee provides absolute peace of mind.',
+      service: lang === 'ar' ? 'تنظيف مكاتب وشركات' : 'Commercial Office Cleaning'
     }
   ];
 
@@ -291,7 +298,7 @@ export default function HomePageView({ lang }: HomePageViewProps) {
                 {/* Visual Frame */}
                 <div className="relative aspect-[16/11] sm:aspect-[16/10] lg:aspect-[4/3] xl:aspect-[16/11] w-full overflow-hidden bg-[#18292C]/5">
                   {/* Photo with LTR/RTL horizontal flip: In RTL (-scale-x-100), the team faces towards the Arabic text on the right */}
-                  <img
+                  <Image
                     id="darclean-hero-image"
                     src="/darclean-homepage-hero-v1.jpg"
                     alt={
@@ -299,16 +306,13 @@ export default function HomePageView({ lang }: HomePageViewProps) {
                         ? 'طاقم دار كلين طرابلس - نظافة احترافية للمنازل والشركات بزي موحد'
                         : 'DarClean Tripoli cleaning staff in uniform'
                     }
-                    className={`w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105 ${
+                    fill
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                    className={`object-cover object-center transition-transform duration-700 group-hover:scale-105 ${
                       isRtl ? '-scale-x-100' : 'scale-x-100'
                     }`}
                     referrerPolicy="no-referrer"
-                    onError={(e) => {
-                      const target = e.currentTarget;
-                      if (target.src.endsWith('.jpg')) {
-                        target.src = '/darclean-homepage-hero-v1.png';
-                      }
-                    }}
                   />
 
                   {/* Gradient shadow for contrast */}
@@ -621,7 +625,7 @@ export default function HomePageView({ lang }: HomePageViewProps) {
       </section>
 
       {/* 6. PRICING EXPLANATION (EXACT SPECIFICATION FROM PROMPT + LIVE ESTIMATOR) */}
-      <section className="py-16 bg-[#F7F3EA] border-b border-[#E5E0D5]">
+      <section id="darclean-pricing-calculator" className="py-16 bg-[#F7F3EA] border-b border-[#E5E0D5] scroll-mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
             {/* Exact Pricing Text Specification */}
@@ -690,32 +694,100 @@ export default function HomePageView({ lang }: HomePageViewProps) {
                 <div className="flex items-center justify-between pb-3 border-b border-[#E5E0D5]">
                   <div>
                     <span className="text-xs uppercase font-bold text-[#0B4F55]">
-                      {lang === 'ar' ? 'حاسبة التكلفة الفورية' : 'Instant Price Estimator'}
+                      {lang === 'ar' ? 'حاسبة التكلفة الفورية الشاملة' : 'Comprehensive Live Estimator'}
                     </span>
                     <h3 className="text-lg font-bold text-[#18292C]">
-                      {lang === 'ar' ? 'احسب تكلفة حجزك الآن' : 'Estimate Your Booking Cost'}
+                      {lang === 'ar' ? 'احسب تكلفة حجزك بدقة الآن' : 'Accurately Calculate Your Estimate'}
                     </h3>
                   </div>
                   <span className="px-2.5 py-1 rounded-full bg-[#49C7B5]/15 text-[#0B4F55] text-xs font-bold">
-                    $10 / hr
+                    ${hourlyRate} / {lang === 'ar' ? 'ساعة للعامل' : 'cleaner-hr'}
                   </span>
                 </div>
 
-                {/* Cleaners Selector */}
+                {/* Service Tier Selection */}
                 <div>
-                  <label className="flex justify-between text-xs font-bold text-[#0B4F55] uppercase mb-1.5">
-                    <span>{lang === 'ar' ? 'عدد عمال التنظيف:' : 'Number of Cleaners:'}</span>
-                    <span className="text-[#18292C]">{cleaners} {lang === 'ar' ? 'عمال' : 'cleaners'}</span>
+                  <label className="block text-xs font-bold text-[#0B4F55] uppercase mb-1.5">
+                    {lang === 'ar' ? 'نوع التنظيف المطلوب:' : 'Cleaning Intensity:'}
                   </label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {[1, 2, 3, 4].map((n) => (
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setServiceTier('standard')}
+                      className={`p-2.5 rounded-xl text-xs font-semibold text-start border transition-colors ${
+                        serviceTier === 'standard'
+                          ? 'border-[#0B4F55] bg-[#0B4F55]/10 text-[#0B4F55] font-bold'
+                          : 'border-[#E5E0D5] bg-[#F7F3EA] text-[#5C6E71]'
+                      }`}
+                    >
+                      <span className="block font-bold">
+                        {lang === 'ar' ? 'تنظيف قياسي دوري' : 'Standard Cleaning'}
+                      </span>
+                      <span className="text-[10px] text-[#49C7B5] font-semibold">
+                        {lang === 'ar' ? '10$ / ساعة لكل عامل' : '$10 / cleaner-hour'}
+                      </span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setServiceTier('deep')}
+                      className={`p-2.5 rounded-xl text-xs font-semibold text-start border transition-colors ${
+                        serviceTier === 'deep'
+                          ? 'border-[#0B4F55] bg-[#0B4F55]/10 text-[#0B4F55] font-bold'
+                          : 'border-[#E5E0D5] bg-[#F7F3EA] text-[#5C6E71]'
+                      }`}
+                    >
+                      <span className="block font-bold">
+                        {lang === 'ar' ? 'تنظيف عميق / بعد ورشة' : 'Deep / Post-Renovation'}
+                      </span>
+                      <span className="text-[10px] text-[#0B4F55] font-semibold">
+                        {lang === 'ar' ? '12$ / ساعة (شامل معدات كشط)' : '$12 / cleaner-hour'}
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Cleaners Selector with Stepper & Flexible Scale (Supports >4 Cleaners) */}
+                <div>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-bold text-[#0B4F55] uppercase">
+                      {lang === 'ar' ? 'عدد عمال التنظيف:' : 'Number of Cleaners:'}
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setCleaners((prev) => Math.max(1, prev - 1))}
+                        disabled={cleaners <= 1}
+                        aria-label="Decrease cleaners"
+                        className="w-7 h-7 rounded-lg border border-[#E5E0D5] bg-[#F7F3EA] text-[#0B4F55] hover:bg-[#EAE5DA] disabled:opacity-40 flex items-center justify-center transition-colors"
+                      >
+                        <Minus className="w-3.5 h-3.5" />
+                      </button>
+                      <span className="text-xs font-bold text-[#18292C] min-w-16 text-center">
+                        {cleaners} {lang === 'ar' ? 'عمال' : 'cleaners'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setCleaners((prev) => Math.min(15, prev + 1))}
+                        disabled={cleaners >= 15}
+                        aria-label="Increase cleaners"
+                        className="w-7 h-7 rounded-lg border border-[#E5E0D5] bg-[#F7F3EA] text-[#0B4F55] hover:bg-[#EAE5DA] disabled:opacity-40 flex items-center justify-center transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Cleaners Quick Pills */}
+                  <div className="grid grid-cols-8 gap-1 sm:gap-1.5">
+                    {[1, 2, 3, 4, 5, 6, 8, 10].map((n) => (
                       <button
                         key={n}
                         type="button"
                         onClick={() => setCleaners(n)}
                         className={`py-2 rounded-xl text-xs font-bold transition-colors ${
                           cleaners === n
-                            ? 'bg-[#0B4F55] text-white'
+                            ? 'bg-[#0B4F55] text-white shadow-sm'
                             : 'bg-[#F7F3EA] text-[#18292C] border border-[#E5E0D5] hover:bg-[#EAE5DA]'
                         }`}
                       >
@@ -723,109 +795,210 @@ export default function HomePageView({ lang }: HomePageViewProps) {
                       </button>
                     ))}
                   </div>
+                  {cleaners >= 5 && (
+                    <div className="mt-1.5 p-2 rounded-xl bg-[#0B4F55]/5 border border-[#0B4F55]/15 flex items-center gap-1.5 text-[11px] text-[#0B4F55] font-semibold">
+                      <Sparkles className="w-3.5 h-3.5 text-[#49C7B5] flex-shrink-0" />
+                      <span>
+                        {lang === 'ar'
+                          ? 'باقة فريق عمل متكامل: مثالية للفلل، الشقق الكبيرة، والمنشآت التجارية في طرابلس.'
+                          : 'Full crew tier: Ideal for large apartments, villas, and commercial establishments.'}
+                      </span>
+                    </div>
+                  )}
                 </div>
 
-                {/* Hours Selector (Enforcing 2-hour minimum) */}
+                {/* Hours Selector with Stepper & Extended Scale (Supports >5 Hours) */}
                 <div>
-                  <label className="flex justify-between text-xs font-bold text-[#0B4F55] uppercase mb-1.5">
-                    <span>{lang === 'ar' ? 'ساعات العمل لكل عامل:' : 'Hours per cleaner:'}</span>
-                    <span className="text-[#18292C]">{effectiveHours} {lang === 'ar' ? 'ساعات' : 'hours'}</span>
-                  </label>
-                  <div className="grid grid-cols-4 gap-2">
-                    {[2, 3, 4, 5].map((h) => (
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-bold text-[#0B4F55] uppercase">
+                      {lang === 'ar' ? 'ساعات العمل لكل عامل:' : 'Hours per cleaner:'}
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setHours((prev) => Math.max(2, prev - 1))}
+                        disabled={effectiveHours <= 2}
+                        aria-label="Decrease hours"
+                        className="w-7 h-7 rounded-lg border border-[#E5E0D5] bg-[#F7F3EA] text-[#0B4F55] hover:bg-[#EAE5DA] disabled:opacity-40 flex items-center justify-center transition-colors"
+                      >
+                        <Minus className="w-3.5 h-3.5" />
+                      </button>
+                      <span className="text-xs font-bold text-[#18292C] min-w-16 text-center">
+                        {effectiveHours} {lang === 'ar' ? 'ساعات' : 'hours'}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setHours((prev) => Math.min(12, prev + 1))}
+                        disabled={effectiveHours >= 12}
+                        aria-label="Increase hours"
+                        className="w-7 h-7 rounded-lg border border-[#E5E0D5] bg-[#F7F3EA] text-[#0B4F55] hover:bg-[#EAE5DA] disabled:opacity-40 flex items-center justify-center transition-colors"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Hours Quick Pills */}
+                  <div className="grid grid-cols-8 gap-1 sm:gap-1.5">
+                    {[2, 3, 4, 5, 6, 8, 10, 12].map((h) => (
                       <button
                         key={h}
                         type="button"
                         onClick={() => setHours(h)}
                         className={`py-2 rounded-xl text-xs font-bold transition-colors ${
                           effectiveHours === h
-                            ? 'bg-[#0B4F55] text-white'
+                            ? 'bg-[#0B4F55] text-white shadow-sm'
                             : 'bg-[#F7F3EA] text-[#18292C] border border-[#E5E0D5] hover:bg-[#EAE5DA]'
                         }`}
                       >
-                        {h} {lang === 'ar' ? 'س' : 'hrs'}
+                        {h} {lang === 'ar' ? 'س' : 'h'}
                       </button>
                     ))}
                   </div>
-                  <span className="text-[11px] text-[#5C6E71] mt-1 block">
-                    {lang === 'ar' ? '*الحدّ الأدنى ساعتان لكل عامل تنظيف' : '*Two-hour minimum per cleaner'}
-                  </span>
+                  <div className="flex items-center justify-between text-[11px] text-[#5C6E71] mt-1.5">
+                    <span>{lang === 'ar' ? '*الحدّ الأدنى ساعتان لكل عامل تنظيف' : '*2-hour minimum per cleaner'}</span>
+                    <span className="font-bold text-[#0B4F55]">
+                      {lang === 'ar' ? `إجمالي ساعات الورشة: ${cleaners * effectiveHours} س` : `Total crew work: ${cleaners * effectiveHours} hrs`}
+                    </span>
+                  </div>
                 </div>
 
-                {/* Location Selection */}
+                {/* Specific Geographic Area Selection with Individual Pricing */}
                 <div>
-                  <label className="block text-xs font-bold text-[#0B4F55] uppercase mb-1.5">
-                    {lang === 'ar' ? 'نطاق الموقع الجغرافي:' : 'Service Area Range:'}
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => setAreaRange('inside')}
-                      className={`p-2.5 rounded-xl text-xs font-semibold text-start border transition-colors ${
-                        areaRange === 'inside'
-                          ? 'border-[#0B4F55] bg-[#0B4F55]/10 text-[#0B4F55] font-bold'
-                          : 'border-[#E5E0D5] bg-[#F7F3EA] text-[#5C6E71]'
-                      }`}
-                    >
-                      <span className="block font-bold">{lang === 'ar' ? 'داخل طرابلس والميناء' : 'Inside Tripoli & Mina'}</span>
-                      <span className="text-[10px] text-[#49C7B5] font-semibold">{lang === 'ar' ? 'تنقل مجاني (0$)' : 'Free Travel ($0)'}</span>
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => setAreaRange('outside')}
-                      className={`p-2.5 rounded-xl text-xs font-semibold text-start border transition-colors ${
-                        areaRange === 'outside'
-                          ? 'border-[#0B4F55] bg-[#0B4F55]/10 text-[#0B4F55] font-bold'
-                          : 'border-[#E5E0D5] bg-[#F7F3EA] text-[#5C6E71]'
-                      }`}
-                    >
-                      <span className="block font-bold">{lang === 'ar' ? 'المناطق المحيطة' : 'Surrounding Areas'}</span>
-                      <span className="text-[10px] text-[#5C6E71]">{lang === 'ar' ? 'القلمون، الكورة (+3$)' : 'Qalamoun, Koura (+3$)'}</span>
-                    </button>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <label className="text-xs font-bold text-[#0B4F55] uppercase flex items-center gap-1">
+                      <MapPin className="w-3.5 h-3.5 text-[#0B4F55]" />
+                      <span>{lang === 'ar' ? 'المنطقة أو الحي (تسعير انتقال محدد لكل منطقة):' : 'Service Location & Individual Surcharge:'}</span>
+                    </label>
+                    <span className={`text-[11px] font-bold px-2 py-0.5 rounded-lg ${
+                      travelCost === 0
+                        ? 'bg-[#49C7B5]/15 text-[#0B4F55]'
+                        : 'bg-[#F2C85B]/20 text-[#0B4F55]'
+                    }`}>
+                      {travelCost === 0
+                        ? (lang === 'ar' ? 'تنقل مجاني 0$' : 'Free Transport ($0)')
+                        : (lang === 'ar' ? `رسم انتقال +${travelCost}$` : `+${travelCost}$ Travel Fee`)}
+                    </span>
                   </div>
+
+                  {/* Dropdown for All Defined Areas */}
+                  <div className="relative">
+                    <select
+                      value={selectedAreaId}
+                      onChange={(e) => setSelectedAreaId(e.target.value)}
+                      className="w-full p-2.5 bg-[#F7F3EA] border border-[#E5E0D5] rounded-xl text-xs font-semibold text-[#18292C] focus:outline-none focus:ring-2 focus:ring-[#0B4F55]"
+                    >
+                      <optgroup label={lang === 'ar' ? 'داخل طرابلس الكبرى والميناء (تنقل مجاني 0$)' : 'Inside Tripoli & Al-Mina (Free Transport $0)'}>
+                        {DEFAULT_SERVICE_AREAS.filter((a) => a.isInsideTripoli).map((area) => (
+                          <option key={area.id} value={area.id}>
+                            {lang === 'ar' ? area.nameAr : area.nameEn} (0$)
+                          </option>
+                        ))}
+                      </optgroup>
+                      <optgroup label={lang === 'ar' ? 'المناطق والبلدات المجاورة (رسم انتقال طاقم محدد مسبقاً)' : 'Surrounding Municipalities (Fixed Travel Surcharges)'}>
+                        {DEFAULT_SERVICE_AREAS.filter((a) => !a.isInsideTripoli).map((area) => (
+                          <option key={area.id} value={area.id}>
+                            {lang === 'ar' ? area.nameAr : area.nameEn} (+${area.travelChargeUsd} USD)
+                          </option>
+                        ))}
+                      </optgroup>
+                    </select>
+                  </div>
+
+                  {/* Fast Area Shortcut Pills */}
+                  <div className="flex flex-wrap gap-1.5 mt-2">
+                    {[
+                      { id: 'dam_w_farez', labelAr: 'ضم وفرز (0$)', labelEn: 'Dam w Farez ($0)' },
+                      { id: 'mina', labelAr: 'الميناء (0$)', labelEn: 'Al-Mina ($0)' },
+                      { id: 'tripoli_central', labelAr: 'الزاهرية/التل (0$)', labelEn: 'Tell/Zaheriyeh ($0)' },
+                      { id: 'abi_samra', labelAr: 'أبي سمراء/القبة (0$)', labelEn: 'Abi Samra ($0)' },
+                      { id: 'beddawi', labelAr: 'البداوي (+2$)', labelEn: 'Beddawi (+$2)' },
+                      { id: 'qalamoun', labelAr: 'القلمون (+3$)', labelEn: 'Qalamoun (+$3)' },
+                      { id: 'koura_near', labelAr: 'الكورة (+4$)', labelEn: 'Koura (+$4)' },
+                      { id: 'zgharta', labelAr: 'زغرتا (+5$)', labelEn: 'Zgharta (+$5)' },
+                    ].map((pill) => (
+                      <button
+                        key={pill.id}
+                        type="button"
+                        onClick={() => setSelectedAreaId(pill.id)}
+                        className={`px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-colors ${
+                          selectedAreaId === pill.id
+                            ? 'bg-[#0B4F55] text-white shadow-xs'
+                            : 'bg-[#F7F3EA] text-[#5C6E71] border border-[#E5E0D5] hover:bg-[#EAE5DA]'
+                        }`}
+                      >
+                        {lang === 'ar' ? pill.labelAr : pill.labelEn}
+                      </button>
+                    ))}
+                  </div>
+
+                  <p className="text-[11px] text-[#5C6E71] mt-1.5">
+                    {lang === 'ar' ? activeArea.notesAr : activeArea.notesEn}
+                  </p>
                 </div>
 
-                {/* Calculated Display */}
-                <div className="p-4 rounded-xl bg-[#F7F3EA] border border-[#E5E0D5] space-y-1.5">
+                {/* Calculated Display Breakdown */}
+                <div className="p-4 rounded-2xl bg-[#F7F3EA] border border-[#E5E0D5] space-y-2">
                   <div className="flex justify-between text-xs text-[#5C6E71]">
-                    <span>{cleaners} × {effectiveHours} {lang === 'ar' ? 'ساعات' : 'hrs'} @ $10</span>
-                    <span>${basePrice} USD</span>
-                  </div>
-                  {travelCost > 0 && (
-                    <div className="flex justify-between text-xs text-[#5C6E71]">
-                      <span>{lang === 'ar' ? 'رسم التنقل:' : 'Nominal Travel:'}</span>
-                      <span>+${travelCost} USD</span>
-                    </div>
-                  )}
-                  <div className="pt-2 border-t border-[#E5E0D5] flex justify-between items-baseline">
-                    <span className="text-sm font-bold text-[#0B4F55]">
-                      {lang === 'ar' ? 'المبلغ التقديري:' : 'Estimated Total:'}
+                    <span>
+                      {cleaners} × {effectiveHours} {lang === 'ar' ? 'ساعات عمل' : 'hours'} @ ${hourlyRate}
                     </span>
-                    <span className="text-2xl font-black text-[#0B4F55]">
-                      ${estimatedTotal} USD
+                    <span className="font-semibold text-[#18292C]">${basePrice} USD</span>
+                  </div>
+
+                  <div className="flex justify-between text-xs text-[#5C6E71]">
+                    <span>
+                      {lang === 'ar' ? 'رسم التنقل:' : 'Travel Fee:'} {lang === 'ar' ? activeArea.nameAr : activeArea.nameEn}
+                    </span>
+                    <span className="font-semibold text-[#18292C]">
+                      {travelCost === 0
+                        ? (lang === 'ar' ? 'مجاني (0$ USD)' : 'Free ($0 USD)')
+                        : `+$${travelCost} USD`}
+                    </span>
+                  </div>
+
+                  <div className="pt-2 border-t border-[#E5E0D5] flex justify-between items-baseline">
+                    <div>
+                      <span className="text-sm font-bold text-[#0B4F55] block">
+                        {lang === 'ar' ? 'المبلغ التقديري الإجمالي:' : 'Estimated Total:'}
+                      </span>
+                      <span className="text-[11px] text-[#5C6E71]">
+                        ~{(estimatedTotal * 89500).toLocaleString('en-US')} {lang === 'ar' ? 'ل.ل (سعر السوق)' : 'LBP'}
+                      </span>
+                    </div>
+                    <span className="text-2xl sm:text-3xl font-black text-[#0B4F55]">
+                      ${estimatedTotal} <span className="text-xs font-bold text-[#5C6E71]">USD</span>
+                    </span>
+                  </div>
+
+                  <div className="pt-1 text-[11px] text-[#0B4F55] font-medium flex items-center gap-1.5">
+                    <ShieldCheck className="w-3.5 h-3.5 text-[#49C7B5] flex-shrink-0" />
+                    <span>
+                      {lang === 'ar'
+                        ? 'مشمول بالكامل بمواد ومعدات التنظيف وضمان إعادة التنظيف المجاني.'
+                        : 'Fully covers cleaning supplies, gear, and free corrective re-clean guarantee.'}
                     </span>
                   </div>
                 </div>
 
-                {/* CTA buttons */}
+                {/* CTA buttons with dynamic prefilled parameters */}
                 <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
                   <a
                     href={`https://wa.me/96176408309?text=${encodeURIComponent(
                       lang === 'ar'
-                        ? `مرحباً دار كلين، أرغب بحجز تنظيف لعدد ${cleaners} عمال لمدة ${effectiveHours} ساعات في ${areaRange === 'inside' ? 'طرابلس' : 'ضواحي طرابلس'}. التكلفة التقديرية: ${estimatedTotal}$`
-                        : `Hello DarClean, I would like to book cleaning for ${cleaners} cleaner(s), ${effectiveHours} hours in ${areaRange === 'inside' ? 'Tripoli' : 'Surroundings'}. Estimated: $${estimatedTotal}`
+                        ? `مرحباً دار كلين، أود حجز تنظيف بناءً على الحاسبة:\n• الخدمة: ${serviceTier === 'deep' ? 'تنظيف عميق / بعد ورشة' : 'تنظيف منزلي قياسي'}\n• عدد العمال: ${cleaners} عمال\n• الساعات لكل عامل: ${effectiveHours} ساعات (إجمالي ${cleaners * effectiveHours} ساعة عمل)\n• المنطقة: ${activeArea.nameAr}\n• رسم التنقل: ${travelCost === 0 ? 'مجاني 0$' : `${travelCost}$`}\n• التكلفة التقديرية: ${estimatedTotal}$ (~${(estimatedTotal * 89500).toLocaleString('en-US')} ل.ل)\nأرجو تأكيد أقرب موعد متاح.`
+                        : `Hello DarClean, I would like to book cleaning:\n• Service: ${serviceTier === 'deep' ? 'Deep Cleaning' : 'Standard Cleaning'}\n• Cleaners: ${cleaners}\n• Hours per cleaner: ${effectiveHours} hrs (${cleaners * effectiveHours} total crew hours)\n• Location: ${activeArea.nameEn}\n• Travel fee: ${travelCost === 0 ? 'Free $0' : `$${travelCost}`}\n• Estimated Total: $${estimatedTotal} USD\nPlease confirm availability.`
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex-1 py-3 rounded-xl bg-[#0B4F55] hover:bg-[#083F44] text-white font-bold text-xs sm:text-sm text-center flex items-center justify-center gap-2 shadow-sm"
+                    className="flex-1 py-3 px-4 rounded-xl bg-[#0B4F55] hover:bg-[#083F44] text-white font-bold text-xs sm:text-sm text-center flex items-center justify-center gap-2 shadow-sm transition-colors"
                   >
                     <WhatsAppIcon className="w-4 h-4 text-[#49C7B5]" />
                     <span>{lang === 'ar' ? 'تأكيد عبر واتساب' : 'Confirm on WhatsApp'}</span>
                   </a>
 
                   <Link
-                    href={`/${lang}/book`}
+                    href={`/${lang}/book?cleaners=${cleaners}&hours=${effectiveHours}&area=${selectedAreaId}&tier=${serviceTier}`}
                     className="py-3 px-4 rounded-xl bg-transparent border border-[#0B4F55] text-[#0B4F55] font-bold text-xs sm:text-sm text-center hover:bg-[#0B4F55]/5 transition-colors"
                   >
                     {lang === 'ar' ? 'حجز أونلاين' : 'Book Online'}
@@ -1036,7 +1209,7 @@ export default function HomePageView({ lang }: HomePageViewProps) {
             {/* Approved Logo in Brand-Introduction Context */}
             <div className="lg:col-span-4 flex justify-center">
               <div className="p-6 rounded-3xl bg-white text-center shadow-lg border border-[#E5E0D5] max-w-xs">
-                <div className="flex justify-center mb-3">
+                <div className="flex justify-center">
                   <Image
                     src="/darclean-full-logo-transparent.png"
                     alt="DarClean دار كلين"
@@ -1047,12 +1220,7 @@ export default function HomePageView({ lang }: HomePageViewProps) {
                     referrerPolicy="no-referrer"
                   />
                 </div>
-                <p className="text-xs text-[#5C6E71] font-medium leading-relaxed">
-                  {lang === 'ar'
-                    ? 'من البيت للشغل، النظافة علينا.'
-                    : 'For home and business, leave the cleaning to us.'}
-                </p>
-                <div className="mt-3 pt-3 border-t border-[#E5E0D5] flex items-center justify-center gap-1.5 text-xs text-[#0B4F55] font-bold">
+                <div className="mt-4 pt-3 border-t border-[#E5E0D5] flex items-center justify-center gap-1.5 text-xs text-[#0B4F55] font-bold">
                   <ShieldCheck className="w-4 h-4 text-[#49C7B5]" />
                   <span>{lang === 'ar' ? 'معتمد وموثوق في طرابلس' : 'Tripoli Verified'}</span>
                 </div>
@@ -1067,15 +1235,15 @@ export default function HomePageView({ lang }: HomePageViewProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-12 space-y-2">
             <span className="text-xs uppercase tracking-wider font-bold text-[#0B4F55]">
-              {lang === 'ar' ? 'تجارب حقيقية' : 'Customer Experiences'}
+              {lang === 'ar' ? 'حكي ناسنا من طرابلس' : 'Tripoli Client Stories'}
             </span>
-            <h2 className="text-3xl font-bold text-[#0B4F55]">
-              {lang === 'ar' ? 'ماذا يقول زبائننا في طرابلس؟' : 'What Our Tripoli Clients Say'}
+            <h2 className="text-2xl sm:text-3xl font-bold text-[#0B4F55]">
+              {lang === 'ar' ? 'شو عم يحكوا زبائننا بطرابلس؟' : 'What Our Tripoli Clients Say'}
             </h2>
-            <p className="text-sm text-[#5C6E71]">
+            <p className="text-xs sm:text-sm text-[#5C6E71]">
               {lang === 'ar'
-                ? 'ثقة متنامية من العائلات والشركات في طرابلس والميناء'
-                : 'Real experiences from local households and commercial clients in North Lebanon'}
+                ? 'ثقة ببيوت وشركات طرابلس والميناء، من ناس متلك جرّبونا وشافوا النتيجة'
+                : 'Real trust from local families, clinics, and businesses across Tripoli and Al-Mina'}
             </p>
           </div>
 
