@@ -75,6 +75,9 @@ export default function HomePageView({ lang }: HomePageViewProps) {
   // FAQ Accordion state
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
 
+  // Hero image with fallback support in case uploaded file name differs
+  const [heroImageSrc, setHeroImageSrc] = useState<string>('/darclean-homepage-hero-v1.jpg');
+
   // Trust Promises (7 required points)
   const trustPromises = [
     {
@@ -300,7 +303,7 @@ export default function HomePageView({ lang }: HomePageViewProps) {
                   {/* Photo with LTR/RTL horizontal flip: In RTL (-scale-x-100), the team faces towards the Arabic text on the right */}
                   <Image
                     id="darclean-hero-image"
-                    src="/darclean-homepage-hero-v1.jpg"
+                    src={heroImageSrc}
                     alt={
                       lang === 'ar'
                         ? 'طاقم دار كلين طرابلس - نظافة احترافية للمنازل والشركات بزي موحد'
@@ -308,11 +311,14 @@ export default function HomePageView({ lang }: HomePageViewProps) {
                     }
                     fill
                     priority
+                    unoptimized
                     sizes="(max-width: 1024px) 100vw, 50vw"
-                    className={`object-cover object-center transition-transform duration-700 group-hover:scale-105 ${
-                      isRtl ? '-scale-x-100' : 'scale-x-100'
-                    }`}
-                    referrerPolicy="no-referrer"
+                    className="object-cover object-center transition-transform duration-700 group-hover:scale-105"
+                    onError={() => {
+                      if (!heroImageSrc.includes('unsplash')) {
+                        setHeroImageSrc('https://images.unsplash.com/photo-1581578731548-c64695cc6952?auto=format&fit=crop&w=1600&q=80');
+                      }
+                    }}
                   />
 
                   {/* Gradient shadow for contrast */}

@@ -27,6 +27,18 @@ export const metadata: Metadata = {
     title: 'DarClean / دار كلين | تنظيف منازل وشركات في طرابلس',
     description: 'خدمات تنظيف منازل ومؤسسات في طرابلس وضواحيها. حجز فوري ودفع كاش أو Whish.',
   },
+  icons: {
+    icon: [
+      { url: '/favicon.ico', sizes: '32x32' },
+      { url: '/icon.png', sizes: '512x512', type: 'image/png' },
+      { url: '/darclean-symbol-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+      { url: '/darclean-symbol-512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    shortcut: '/favicon.ico',
+  },
 };
 
 export default function RootLayout({children}: {children: React.ReactNode}) {
