@@ -105,58 +105,9 @@ export const DEFAULT_SERVICE_AREAS: ServiceArea[] = [
   },
 ];
 
-export const DEFAULT_STAFF: StaffMember[] = [
-  {
-    id: 'stf-01',
-    fullNameAr: 'فاطمة المير',
-    fullNameEn: 'Fatima Al-Mir',
-    gender: 'female',
-    phone: '+961 70 112 233',
-    idCardNumber: 'TRP-ID-4401',
-    uniformIssued: true,
-    active: true,
-    role: 'team_lead',
-    notes: 'خبرة 4 سنوات في تنظيف الفيلات والشقق المفروشة في الميناء وضم وفرز',
-  },
-  {
-    id: 'stf-02',
-    fullNameAr: 'أحمد الحصني',
-    fullNameEn: 'Ahmad Al-Hosni',
-    gender: 'male',
-    phone: '+961 71 889 900',
-    idCardNumber: 'TRP-ID-4402',
-    uniformIssued: true,
-    active: true,
-    role: 'cleaner',
-    notes: 'متخصص في ماكينات غسيل السجاد والواجهات الزجاجية للمكاتب',
-  },
-  {
-    id: 'stf-03',
-    fullNameAr: 'نور كبارة',
-    fullNameEn: 'Nour Kabbara',
-    gender: 'female',
-    phone: '+961 76 554 433',
-    idCardNumber: 'TRP-ID-4403',
-    uniformIssued: true,
-    active: true,
-    role: 'cleaner',
-    notes: 'دقيقة في تفاصيل المطابخ والتعقيم المنزلي',
-  },
-  {
-    id: 'stf-04',
-    fullNameAr: 'عمر درويش',
-    fullNameEn: 'Omar Darwish',
-    gender: 'male',
-    phone: '+961 03 667 788',
-    idCardNumber: 'TRP-ID-4404',
-    uniformIssued: true,
-    active: true,
-    role: 'cleaner',
-    notes: 'تنظيف ما بعد الصيانة ودهان الشقق والمؤسسات',
-  },
-];
+export const DEFAULT_STAFF: StaffMember[] = [];
 
-// Fallback in-memory store for dev / preview resilience
+// Fallback in-memory store for local dev / testing resilience
 class ResilientDataStore {
   private bookings: Map<string, Booking> = new Map();
   private quotes: Map<string, CommercialQuote> = new Map();
@@ -165,151 +116,8 @@ class ResilientDataStore {
   private pricing: PricingSettings = { ...DEFAULT_PRICING };
 
   constructor() {
-    // Seed areas
+    // Seed system areas
     DEFAULT_SERVICE_AREAS.forEach((area) => this.areas.set(area.id, area));
-    // Seed staff
-    DEFAULT_STAFF.forEach((member) => this.staff.set(member.id, member));
-
-    // Seed realistic sample bookings in Tripoli
-    const sampleBooking1: Booking = {
-      id: 'bk-tripoli-01',
-      reference: 'DC-TRP-841920',
-      managementToken: 'dc_token_dam_w_farez_9921',
-      serviceCategory: 'home',
-      serviceType: 'standard_home',
-      customerName: 'طارق غندور',
-      customerPhone: '+961 70 234 567',
-      customerEmail: 'tarek.g@example.com',
-      areaId: 'dam_w_farez',
-      areaNameAr: 'طرابلس (ضم وفرز / المعرض / المئتين)',
-      areaNameEn: 'Tripoli (Dam w Farez / Maarad / Al-Miatayn)',
-      addressDetails: 'شارع المعرض، بناية الواحة، طابق 4',
-      building: 'بناية الواحة',
-      floor: 'الرابع',
-      landmark: 'خلف باتيسري سابليه',
-      serviceDate: new Date(Date.now() + 86400000).toISOString().split('T')[0], // Tomorrow
-      timeSlot: '09:00 - 12:00 (صباحاً)',
-      cleanersCount: 2,
-      estimatedHours: 3,
-      hourlyRate: 10.0,
-      seasonalMultiplier: 1.0,
-      cleanersHourlyTotal: 60.0, // 2 cleaners * 3 hrs * $10
-      travelCharge: 0,
-      extrasCharge: 0,
-      selectedExtras: [],
-      totalPrice: 60.0,
-      currency: 'USD',
-      paymentMethod: 'cash',
-      paymentStatus: 'pending',
-      sameCleanerPreferred: true,
-      preferredCleanerId: 'stf-01',
-      status: 'confirmed',
-      assignedStaffIds: ['stf-01', 'stf-03'],
-      assignedStaffNames: ['فاطمة المير', 'نور كبارة'],
-      customerNotes: 'الرجاء التركيز على تنظيف الشرفة والمطبخ جيداً',
-      createdAt: new Date(Date.now() - 3600000 * 5).toISOString(),
-      updatedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    };
-
-    const sampleBooking2: Booking = {
-      id: 'bk-tripoli-02',
-      reference: 'DC-TRP-930412',
-      managementToken: 'dc_token_mina_8401',
-      serviceCategory: 'home',
-      serviceType: 'deep_home',
-      customerName: 'رانيا الحلبي',
-      customerPhone: '+961 76 890 123',
-      customerEmail: 'rania.halabi@example.com',
-      areaId: 'mina',
-      areaNameAr: 'الميناء (الكورنيش / الميناء القديم / مار الياس)',
-      areaNameEn: 'Al-Mina (Corniche / Old Port / Mar Elias)',
-      addressDetails: 'كورنيش الميناء، بجانب كافيه بحري، بناية صيداوي طابق 2',
-      building: 'بناية صيداوي',
-      floor: 'الثاني',
-      landmark: 'قرب كافيه بحري',
-      serviceDate: new Date(Date.now() + 86400000 * 2).toISOString().split('T')[0],
-      timeSlot: '13:00 - 16:00 (بعد الظهر)',
-      cleanersCount: 1,
-      estimatedHours: 4,
-      hourlyRate: 10.0,
-      seasonalMultiplier: 1.0,
-      cleanersHourlyTotal: 40.0,
-      travelCharge: 0,
-      extrasCharge: 10.0,
-      selectedExtras: ['oven_deep_clean'],
-      totalPrice: 50.0,
-      currency: 'USD',
-      paymentMethod: 'whish',
-      paymentStatus: 'pending',
-      sameCleanerPreferred: false,
-      status: 'awaiting_confirmation',
-      assignedStaffIds: [],
-      customerNotes: 'الدفع سيتم عبر Whish Money فور التأكيد',
-      createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-      updatedAt: new Date(Date.now() - 3600000 * 2).toISOString(),
-    };
-
-    const sampleBooking3: Booking = {
-      id: 'bk-tripoli-03',
-      reference: 'DC-TRP-771239',
-      managementToken: 'dc_token_qalamoun_5502',
-      serviceCategory: 'business',
-      serviceType: 'office_commercial',
-      customerName: 'مكتب المحامي سامي كبارة',
-      customerPhone: '+961 03 445 566',
-      areaId: 'tripoli_central',
-      areaNameAr: 'طرابلس (وسط المدينة / التل / الزاهرية)',
-      areaNameEn: 'Tripoli Central (Al-Tell / Zaheriyeh)',
-      addressDetails: 'ساحة التل، بناية فتال سنتر، طابق 5',
-      serviceDate: new Date().toISOString().split('T')[0], // Today
-      timeSlot: '08:30 - 11:30 (صباحاً)',
-      cleanersCount: 2,
-      estimatedHours: 2.5,
-      hourlyRate: 10.0,
-      seasonalMultiplier: 1.0,
-      cleanersHourlyTotal: 50.0,
-      travelCharge: 0,
-      extrasCharge: 0,
-      selectedExtras: [],
-      totalPrice: 50.0,
-      currency: 'USD',
-      paymentMethod: 'cash',
-      paymentStatus: 'received',
-      sameCleanerPreferred: false,
-      status: 'in_progress',
-      assignedStaffIds: ['stf-02', 'stf-04'],
-      assignedStaffNames: ['أحمد الحصني', 'عمر درويش'],
-      customerNotes: 'مكتب محاماة، هدوء واحترام المستندات والملفات',
-      createdAt: new Date(Date.now() - 86400000).toISOString(),
-      updatedAt: new Date().toISOString(),
-      startedAt: new Date().toISOString(),
-    };
-
-    this.bookings.set(sampleBooking1.id, sampleBooking1);
-    this.bookings.set(sampleBooking2.id, sampleBooking2);
-    this.bookings.set(sampleBooking3.id, sampleBooking3);
-
-    // Seed realistic commercial quote
-    const sampleQuote: CommercialQuote = {
-      id: 'qt-comm-01',
-      reference: 'CQ-TRP-2026-001',
-      companyName: 'عيادات الفيحاء التخصصية',
-      contactPerson: 'د. زياد شعراني',
-      phone: '+961 71 443 322',
-      email: 'dr.ziad@fayhaa-clinics.com',
-      businessType: 'clinic_medical',
-      estimatedSqm: 280,
-      frequency: 'twice_weekly',
-      serviceNeeds: ['تعقيم الأرضيات الطبية', 'تنظيف غرف الانتظار', 'تفريغ وتطهير سلات المهملات'],
-      preferredTiming: 'مساءً بعد الساعة 7 (بعد انتهاء دوام المرضى)',
-      address: 'طرابلس، شارع المصارف، بناية النور الطبي',
-      areaId: 'tripoli_central',
-      notes: 'نحتاج فريق عمل بزي موحد ومعقمات معتمدة',
-      status: 'survey_scheduled',
-      quotedAmountUsd: 320,
-      createdAt: new Date(Date.now() - 86400000 * 3).toISOString(),
-    };
-    this.quotes.set(sampleQuote.id, sampleQuote);
   }
 
   // Bookings CRUD
@@ -415,6 +223,11 @@ class ResilientDataStore {
     return this.staff.get(id) || null;
   }
 
+  createStaff(staffData: StaffMember): StaffMember {
+    this.staff.set(staffData.id, staffData);
+    return staffData;
+  }
+
   updateStaff(id: string, updates: Partial<StaffMember>): StaffMember | null {
     const existing = this.staff.get(id);
     if (!existing) return null;
@@ -489,8 +302,9 @@ export function getSupabase(): SupabaseClient | null {
   return supabaseClient;
 }
 
-// Database helper functions that transparently query Supabase when configured,
-// or fallback to the in-memory store for instant preview & development.
+// Production environment flag: In production, Supabase MUST be configured and operational.
+// Fallback to in-memory store is strictly restricted to local development / test mock environments.
+const isProduction = process.env.NODE_ENV === 'production';
 
 export async function fetchAllBookings(): Promise<Booking[]> {
   const supabase = getSupabase();
@@ -500,12 +314,20 @@ export async function fetchAllBookings(): Promise<Booking[]> {
         .from('bookings')
         .select('*')
         .order('created_at', { ascending: false });
-      if (!error && data && data.length > 0) {
+      if (error) {
+        if (isProduction) throw new Error(`Database query error: ${error.message}`);
+        console.warn('Supabase fetch bookings error, using store:', error);
+      } else if (data) {
         return data.map(mapDbToBooking);
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (isProduction) throw err;
       console.warn('Supabase fetch bookings error, using store:', err);
     }
+  }
+
+  if (isProduction) {
+    throw new Error('Database service unavailable. Supabase must be configured in production.');
   }
   return globalStore.getAllBookings();
 }
@@ -518,13 +340,24 @@ export async function fetchBookingByIdOrReference(idOrRef: string): Promise<Book
         .from('bookings')
         .select('*')
         .or(`id.eq.${idOrRef},reference.ilike.${idOrRef}`)
-        .single();
-      if (!error && data) {
+        .maybeSingle();
+
+      if (error) {
+        if (isProduction) throw new Error(`Database error fetching booking: ${error.message}`);
+        console.warn('Supabase fetch booking error:', error);
+      } else if (data) {
         return mapDbToBooking(data);
+      } else {
+        return null;
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (isProduction) throw err;
       console.warn('Supabase fetch booking error:', err);
     }
+  }
+
+  if (isProduction) {
+    throw new Error('Database service unavailable. Supabase must be configured in production.');
   }
   return globalStore.getBookingById(idOrRef) || globalStore.getBookingByReference(idOrRef);
 }
@@ -537,13 +370,24 @@ export async function fetchBookingByToken(token: string): Promise<Booking | null
         .from('bookings')
         .select('*')
         .eq('management_token', token)
-        .single();
-      if (!error && data) {
+        .maybeSingle();
+
+      if (error) {
+        if (isProduction) throw new Error(`Database error fetching booking by token: ${error.message}`);
+        console.warn('Supabase fetch booking by token error:', error);
+      } else if (data) {
         return mapDbToBooking(data);
+      } else {
+        return null;
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (isProduction) throw err;
       console.warn('Supabase fetch booking by token error:', err);
     }
+  }
+
+  if (isProduction) {
+    throw new Error('Database service unavailable. Supabase must be configured in production.');
   }
   return globalStore.getBookingByToken(token);
 }
@@ -558,14 +402,22 @@ export async function insertBooking(booking: Omit<Booking, 'id' | 'createdAt' | 
         .insert(dbPayload)
         .select()
         .single();
-      if (!error && data) {
+      if (error) {
+        if (isProduction) throw new Error(`Database error creating booking: ${error.message}`);
+        console.warn('Supabase insert error, falling back to store:', error);
+      } else if (data) {
         const mapped = mapDbToBooking(data);
-        globalStore.createBooking(booking); // keep in sync
+        if (!isProduction) globalStore.createBooking(booking);
         return mapped;
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (isProduction) throw err;
       console.warn('Supabase insert error, falling back to store:', err);
     }
+  }
+
+  if (isProduction) {
+    throw new Error('Database service unavailable. Supabase must be configured in production.');
   }
   return globalStore.createBooking(booking);
 }
@@ -574,29 +426,41 @@ export async function updateBookingStatusOrDetails(id: string, updates: Partial<
   const supabase = getSupabase();
   if (supabase) {
     try {
+      const dbUpdates: any = { updated_at: new Date().toISOString() };
+      if (updates.status !== undefined) dbUpdates.status = updates.status;
+      if (updates.assignedStaffIds !== undefined) dbUpdates.assigned_staff_ids = updates.assignedStaffIds;
+      if (updates.paymentStatus !== undefined) dbUpdates.payment_status = updates.paymentStatus;
+      if (updates.recleanRequestedAt !== undefined) dbUpdates.reclean_requested_at = updates.recleanRequestedAt;
+      if (updates.recleanReason !== undefined) dbUpdates.reclean_reason = updates.recleanReason;
+      if (updates.recleanScheduledDate !== undefined) dbUpdates.reclean_scheduled_date = updates.recleanScheduledDate;
+      if (updates.recleanNotes !== undefined) dbUpdates.reclean_notes = updates.recleanNotes;
+      if (updates.internalNotes !== undefined) dbUpdates.internal_notes = updates.internalNotes;
+      if (updates.serviceDate !== undefined) dbUpdates.service_date = updates.serviceDate;
+      if (updates.timeSlot !== undefined) dbUpdates.time_slot = updates.timeSlot;
+      if (updates.startedAt !== undefined) dbUpdates.started_at = updates.startedAt;
+      if (updates.completedAt !== undefined) dbUpdates.completed_at = updates.completedAt;
+
       const { data, error } = await supabase
         .from('bookings')
-        .update({
-          status: updates.status,
-          assigned_staff_ids: updates.assignedStaffIds,
-          payment_status: updates.paymentStatus,
-          reclean_requested_at: updates.recleanRequestedAt,
-          reclean_reason: updates.recleanReason,
-          reclean_scheduled_date: updates.recleanScheduledDate,
-          internal_notes: updates.internalNotes,
-          service_date: updates.serviceDate,
-          time_slot: updates.timeSlot,
-          updated_at: new Date().toISOString(),
-        })
+        .update(dbUpdates)
         .eq('id', id)
         .select()
-        .single();
-      if (!error && data) {
+        .maybeSingle();
+
+      if (error) {
+        if (isProduction) throw new Error(`Database error updating booking: ${error.message}`);
+        console.warn('Supabase update error:', error);
+      } else if (data) {
         return mapDbToBooking(data);
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (isProduction) throw err;
       console.warn('Supabase update error:', err);
     }
+  }
+
+  if (isProduction) {
+    throw new Error('Database service unavailable. Supabase must be configured in production.');
   }
   return globalStore.updateBooking(id, updates);
 }
@@ -625,7 +489,8 @@ export async function fetchAllServiceAreas(): Promise<ServiceArea[]> {
       console.warn('Supabase fetch areas error:', err);
     }
   }
-  return globalStore.getAllAreas();
+  // Return static geographic Tripoli service areas if table is not yet seeded
+  return DEFAULT_SERVICE_AREAS;
 }
 
 export async function fetchPricingSettings(): Promise<PricingSettings> {
@@ -636,7 +501,7 @@ export async function fetchPricingSettings(): Promise<PricingSettings> {
         .from('pricing_settings')
         .select('*')
         .limit(1)
-        .single();
+        .maybeSingle();
       if (!error && data) {
         return {
           standardHourlyRateUsd: Number(data.standard_hourly_rate_usd),
@@ -652,26 +517,273 @@ export async function fetchPricingSettings(): Promise<PricingSettings> {
       console.warn('Supabase fetch pricing error:', err);
     }
   }
-  return globalStore.getPricing();
+  return DEFAULT_PRICING;
 }
 
 export async function updatePricingSettingsInDb(updates: Partial<PricingSettings>): Promise<PricingSettings> {
+  const supabase = getSupabase();
+  if (supabase) {
+    try {
+      const dbUpdates: any = { updated_at: new Date().toISOString() };
+      if (updates.standardHourlyRateUsd !== undefined) dbUpdates.standard_hourly_rate_usd = updates.standardHourlyRateUsd;
+      if (updates.minimumHoursPerCleaner !== undefined) dbUpdates.minimum_hours_per_cleaner = updates.minimumHoursPerCleaner;
+      if (updates.seasonalMultiplier !== undefined) dbUpdates.seasonal_multiplier = updates.seasonalMultiplier;
+      if (updates.seasonalNameAr !== undefined) dbUpdates.seasonal_name_ar = updates.seasonalNameAr;
+      if (updates.seasonalNameEn !== undefined) dbUpdates.seasonal_name_en = updates.seasonalNameEn;
+      if (updates.recleanGuaranteeHours !== undefined) dbUpdates.reclean_guarantee_hours = updates.recleanGuaranteeHours;
+      if (updates.productsAndTransportIncludedInTripoli !== undefined) dbUpdates.products_and_transport_included = updates.productsAndTransportIncludedInTripoli;
+
+      const { data, error } = await supabase
+        .from('pricing_settings')
+        .update(dbUpdates)
+        .eq('id', 'current_config')
+        .select()
+        .maybeSingle();
+
+      if (error) {
+        if (isProduction) throw new Error(`Database error updating pricing: ${error.message}`);
+        console.warn('Supabase update pricing error:', error);
+      } else if (data) {
+        return {
+          standardHourlyRateUsd: Number(data.standard_hourly_rate_usd),
+          minimumHoursPerCleaner: Number(data.minimum_hours_per_cleaner),
+          seasonalMultiplier: Number(data.seasonal_multiplier),
+          seasonalNameAr: data.seasonal_name_ar,
+          seasonalNameEn: data.seasonal_name_en,
+          recleanGuaranteeHours: Number(data.reclean_guarantee_hours),
+          productsAndTransportIncludedInTripoli: data.products_and_transport_included,
+        };
+      }
+    } catch (err: any) {
+      if (isProduction) throw err;
+      console.warn('Supabase update pricing error:', err);
+    }
+  }
+
+  if (isProduction) {
+    throw new Error('Database service unavailable in production.');
+  }
   return globalStore.updatePricing(updates);
 }
 
 export async function fetchAllStaff(): Promise<StaffMember[]> {
+  const supabase = getSupabase();
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('staff')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        if (isProduction) throw new Error(`Failed to fetch staff: ${error.message}`);
+        console.warn('Supabase fetch staff error:', error);
+      } else if (data) {
+        return data.map(mapDbToStaff);
+      }
+    } catch (err: any) {
+      if (isProduction) throw err;
+      console.warn('Supabase fetch staff error:', err);
+    }
+  }
+
+  if (isProduction) {
+    throw new Error('Database service unavailable in production.');
+  }
   return globalStore.getAllStaff();
 }
 
+export async function insertStaffMember(staff: StaffMember): Promise<StaffMember> {
+  const supabase = getSupabase();
+  if (supabase) {
+    try {
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(staff.id);
+      const dbPayload: any = {
+        full_name_ar: staff.fullNameAr,
+        full_name_en: staff.fullNameEn || staff.fullNameAr,
+        phone: staff.phone,
+        gender: staff.gender || 'female',
+        id_card_number: staff.idCardNumber || `TRP-ID-${Math.floor(1000 + Math.random() * 9000)}`,
+        uniform_issued: staff.uniformIssued ?? true,
+        role: staff.role || 'cleaner',
+        active: staff.active ?? true,
+        notes: staff.notes || null,
+      };
+      if (isUuid) {
+        dbPayload.id = staff.id;
+        dbPayload.user_id = staff.id;
+      }
+
+      const { data, error } = await supabase
+        .from('staff')
+        .insert(dbPayload)
+        .select()
+        .single();
+
+      if (error) {
+        if (isProduction) throw new Error(`Failed to insert staff member: ${error.message}`);
+        console.warn('Supabase insert staff error:', error);
+      } else if (data) {
+        return mapDbToStaff(data);
+      }
+    } catch (err: any) {
+      if (isProduction) throw err;
+      console.warn('Supabase insert staff error:', err);
+    }
+  }
+
+  if (isProduction) {
+    throw new Error('Database service unavailable in production.');
+  }
+  return globalStore.createStaff(staff);
+}
+
+export async function updateStaffMemberInDb(id: string, updates: Partial<StaffMember>): Promise<StaffMember | null> {
+  const supabase = getSupabase();
+  if (supabase) {
+    try {
+      const dbUpdates: any = {};
+      if (updates.fullNameAr !== undefined) dbUpdates.full_name_ar = updates.fullNameAr;
+      if (updates.fullNameEn !== undefined) dbUpdates.full_name_en = updates.fullNameEn;
+      if (updates.phone !== undefined) dbUpdates.phone = updates.phone;
+      if (updates.gender !== undefined) dbUpdates.gender = updates.gender;
+      if (updates.idCardNumber !== undefined) dbUpdates.id_card_number = updates.idCardNumber;
+      if (updates.uniformIssued !== undefined) dbUpdates.uniform_issued = updates.uniformIssued;
+      if (updates.role !== undefined) dbUpdates.role = updates.role;
+      if (updates.active !== undefined) dbUpdates.active = updates.active;
+      if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
+
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id);
+
+      let query = supabase.from('staff').update(dbUpdates);
+      if (isUuid) {
+        query = query.or(`id.eq.${id},user_id.eq.${id}`);
+      } else {
+        query = query.eq('id', id);
+      }
+
+      const { data, error } = await query.select().maybeSingle();
+
+      if (error) {
+        if (isProduction) throw new Error(`Failed to update staff: ${error.message}`);
+        console.warn('Supabase update staff error:', error);
+      } else if (data) {
+        return mapDbToStaff(data);
+      }
+    } catch (err: any) {
+      if (isProduction) throw err;
+      console.warn('Supabase update staff error:', err);
+    }
+  }
+
+  if (isProduction) {
+    throw new Error('Database service unavailable in production.');
+  }
+  return globalStore.updateStaff(id, updates);
+}
+
 export async function fetchAllCommercialQuotes(): Promise<CommercialQuote[]> {
+  const supabase = getSupabase();
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('commercial_quotes')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        if (isProduction) throw new Error(`Failed to fetch commercial quotes: ${error.message}`);
+        console.warn('Supabase fetch quotes error:', error);
+      } else if (data) {
+        return data.map(mapDbToQuote);
+      }
+    } catch (err: any) {
+      if (isProduction) throw err;
+      console.warn('Supabase fetch quotes error:', err);
+    }
+  }
+
+  if (isProduction) {
+    throw new Error('Database service unavailable in production.');
+  }
   return globalStore.getAllQuotes();
 }
 
 export async function insertCommercialQuote(quote: Omit<CommercialQuote, 'id' | 'createdAt'>): Promise<CommercialQuote> {
+  const supabase = getSupabase();
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('commercial_quotes')
+        .insert({
+          reference: quote.reference,
+          company_name: quote.companyName,
+          contact_person: quote.contactPerson,
+          phone: quote.phone,
+          email: quote.email || null,
+          business_type: quote.businessType,
+          estimated_sqm: quote.estimatedSqm || null,
+          frequency: quote.frequency,
+          service_needs: quote.serviceNeeds || [],
+          preferred_timing: quote.preferredTiming || null,
+          address: quote.address,
+          area_id: quote.areaId || null,
+          notes: quote.notes || null,
+          status: quote.status || 'new',
+          quoted_amount_usd: quote.quotedAmountUsd || null,
+        })
+        .select()
+        .single();
+
+      if (error) {
+        if (isProduction) throw new Error(`Failed to create commercial quote: ${error.message}`);
+        console.warn('Supabase insert quote error:', error);
+      } else if (data) {
+        return mapDbToQuote(data);
+      }
+    } catch (err: any) {
+      if (isProduction) throw err;
+      console.warn('Supabase insert quote error:', err);
+    }
+  }
+
+  if (isProduction) {
+    throw new Error('Database service unavailable in production.');
+  }
   return globalStore.createQuote(quote);
 }
 
 export async function updateCommercialQuote(id: string, updates: Partial<CommercialQuote>): Promise<CommercialQuote | null> {
+  const supabase = getSupabase();
+  if (supabase) {
+    try {
+      const dbUpdates: any = {};
+      if (updates.status !== undefined) dbUpdates.status = updates.status;
+      if (updates.quotedAmountUsd !== undefined) dbUpdates.quoted_amount_usd = updates.quotedAmountUsd;
+      if (updates.notes !== undefined) dbUpdates.notes = updates.notes;
+
+      const { data, error } = await supabase
+        .from('commercial_quotes')
+        .update(dbUpdates)
+        .eq('id', id)
+        .select()
+        .maybeSingle();
+
+      if (error) {
+        if (isProduction) throw new Error(`Failed to update commercial quote: ${error.message}`);
+        console.warn('Supabase update quote error:', error);
+      } else if (data) {
+        return mapDbToQuote(data);
+      }
+    } catch (err: any) {
+      if (isProduction) throw err;
+      console.warn('Supabase update quote error:', err);
+    }
+  }
+
+  if (isProduction) {
+    throw new Error('Database service unavailable in production.');
+  }
   return globalStore.updateQuote(id, updates);
 }
 
@@ -762,5 +874,42 @@ function mapBookingToDb(b: any) {
     internal_notes: b.internalNotes,
     status: b.status,
     assigned_staff_ids: b.assignedStaffIds,
+  };
+}
+
+function mapDbToStaff(d: any): StaffMember {
+  return {
+    id: d.id,
+    fullNameAr: d.full_name_ar,
+    fullNameEn: d.full_name_en,
+    gender: d.gender,
+    phone: d.phone,
+    idCardNumber: d.id_card_number,
+    uniformIssued: d.uniform_issued,
+    active: d.active,
+    role: d.role,
+    notes: d.notes,
+  };
+}
+
+function mapDbToQuote(d: any): CommercialQuote {
+  return {
+    id: d.id,
+    reference: d.reference,
+    companyName: d.company_name,
+    contactPerson: d.contact_person,
+    phone: d.phone,
+    email: d.email,
+    businessType: d.business_type,
+    estimatedSqm: d.estimated_sqm != null ? Number(d.estimated_sqm) : undefined,
+    frequency: d.frequency,
+    serviceNeeds: d.service_needs || [],
+    preferredTiming: d.preferred_timing,
+    address: d.address,
+    areaId: d.area_id,
+    notes: d.notes,
+    status: d.status,
+    quotedAmountUsd: d.quoted_amount_usd != null ? Number(d.quoted_amount_usd) : undefined,
+    createdAt: d.created_at,
   };
 }

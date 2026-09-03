@@ -1,7 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { fetchAllCommercialQuotes, insertCommercialQuote, updateCommercialQuote } from '@/lib/db';
+import { requireAdmin, logAuditAction } from '@/lib/supabase/server';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const { auth, response } = await requireAdmin(req);
+  if (response) return response;
+
   try {
     const quotes = await fetchAllCommercialQuotes();
     return NextResponse.json({ quotes });
@@ -49,6 +53,9 @@ export async function POST(req: NextRequest) {
 }
 
 export async function PATCH(req: NextRequest) {
+  const { auth, response } = await requireAdmin(req);
+  if (response || !auth) return response!;
+
   try {
     const body = await req.json();
     if (!body.id) {
@@ -60,8 +67,19 @@ export async function PATCH(req: NextRequest) {
       quotedAmountUsd: body.quotedAmountUsd !== undefined ? Number(body.quotedAmountUsd) : undefined,
     });
 
+    await logAuditAction({
+      actorId: auth.user.id,
+      actorEmail: auth.user.email,
+      action: 'commercial_quote_updated',
+      targetType: 'commercial_quote',
+      targetId: body.id,
+      details: { status: body.status, quotedAmountUsd: body.quotedAmountUsd },
+      ipAddress: req.headers.get('x-forwarded-for') || undefined,
+    });
+
     return NextResponse.json({ success: true, quote: updated });
   } catch (err: any) {
     return NextResponse.json({ error: 'Failed to update quote' }, { status: 500 });
   }
 }
+

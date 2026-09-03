@@ -156,3 +156,29 @@ export interface ExtraServiceOption {
   descriptionAr: string;
   descriptionEn: string;
 }
+
+export type UserRole = 'admin' | 'staff';
+
+export interface UserProfile {
+  id: string; // matches auth.users(id)
+  email: string;
+  role: UserRole;
+  fullName: string;
+  phone?: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface AuditLog {
+  id: string;
+  actorId?: string;
+  actorEmail?: string;
+  action: string;
+  targetType?: string;
+  targetId?: string;
+  details?: Record<string, any>;
+  ipAddress?: string;
+  createdAt: string;
+}
+

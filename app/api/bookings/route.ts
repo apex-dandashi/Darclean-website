@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { fetchAllBookings, insertBooking } from '@/lib/db';
+import { fetchAllBookings, insertBooking, fetchAllStaff } from '@/lib/db';
 import { BookingStatus } from '@/lib/types';
+import { getAuthenticatedUser } from '@/lib/supabase/server';
 
 // Rate limiting in-memory check (prevents spam submissions)
 const submissionIps = new Map<string, { count: number; resetTime: number }>();
@@ -20,9 +21,40 @@ function checkRateLimit(ip: string): boolean {
 }
 
 export async function GET(req: NextRequest) {
+  // Public users CANNOT read internal bookings
+  const { auth, error, statusCode } = await getAuthenticatedUser(req);
+  if (!auth) {
+    return NextResponse.json(
+      { error: error || 'Authentication required to view bookings.' },
+      { status: statusCode || 401 }
+    );
+  }
+
   try {
-    const bookings = await fetchAllBookings();
-    return NextResponse.json({ bookings });
+    const allBookings = await fetchAllBookings();
+
+    // Administrators get full access to all bookings
+    if (auth.profile.role === 'admin') {
+      return NextResponse.json({ bookings: allBookings });
+    }
+
+    // Staff members only receive bookings assigned to them
+    if (auth.profile.role === 'staff') {
+      const staffList = await fetchAllStaff();
+      // Find staff record associated with this auth user (by user id or email or id)
+      const staffMember = staffList.find(
+        (s) => s.id === auth.user.id || s.phone === auth.profile.phone
+      );
+      const staffId = staffMember?.id || auth.user.id;
+
+      const staffBookings = allBookings.filter((b) =>
+        b.assignedStaffIds?.some((id) => id === staffId || id === auth.user.id)
+      );
+
+      return NextResponse.json({ bookings: staffBookings });
+    }
+
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   } catch (err: any) {
     return NextResponse.json({ error: 'Failed to fetch bookings' }, { status: 500 });
   }

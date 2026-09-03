@@ -213,7 +213,7 @@ export default function HomePageView({ lang }: HomePageViewProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-center">
             {/* Hero Content */}
-            <div className="lg:col-span-7 space-y-6">
+            <div className="lg:col-span-6 space-y-6">
               {/* Tripoli Location Pill with Warm Yellow dot accent */}
               <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#FFFFFF] text-[#0B4F55] text-xs font-semibold border border-[#E5E0D5] shadow-sm">
                 <span className="w-2 h-2 rounded-full bg-[#F2C85B]" />
@@ -285,87 +285,113 @@ export default function HomePageView({ lang }: HomePageViewProps) {
               </div>
             </div>
 
-            {/* Hero Visual: Standalone Symbol & Tripoli Trust Card */}
-            <div className="lg:col-span-5">
-              <div className="bg-white rounded-3xl border border-[#E5E0D5] p-6 sm:p-8 shadow-[0_8px_30px_rgba(11,79,85,0.06)] relative overflow-hidden space-y-6">
-                {/* Subtle Arch decorative header */}
-                <div className="flex items-center justify-between pb-5 border-b border-[#E5E0D5]">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 relative flex-shrink-0">
-                      <Image
-                        src="/darclean-symbol-512.png"
-                        alt="DarClean Doorway Symbol"
-                        width={48}
-                        height={48}
-                        className="object-contain"
-                        priority
-                        referrerPolicy="no-referrer"
-                      />
-                    </div>
-                    <div>
-                      <span className="text-xs uppercase tracking-wider font-bold text-[#0B4F55] block">
-                        {lang === 'ar' ? 'دار كلين طرابلس' : 'DarClean Tripoli'}
-                      </span>
-                      <span className="text-sm font-semibold text-[#5C6E71]">
-                        {lang === 'ar' ? 'طاقم معتمد ومجهّز' : 'Uniformed & Equipped Team'}
-                      </span>
-                    </div>
+            {/* Hero Visual: Realistic Team Photo with LTR/RTL Dynamic Horizontal Flip */}
+            <div className="lg:col-span-6">
+              <div className="relative rounded-3xl overflow-hidden border border-[#E5E0D5] bg-gradient-to-br from-[#0B4F55]/10 via-[#F7F3EA] to-[#49C7B5]/10 shadow-[0_16px_40px_rgba(11,79,85,0.12)] group">
+                {/* Visual Frame */}
+                <div className="relative aspect-[16/11] sm:aspect-[16/10] lg:aspect-[4/3] xl:aspect-[16/11] w-full overflow-hidden bg-[#18292C]/5">
+                  {/* Photo with LTR/RTL horizontal flip: In RTL (-scale-x-100), the team faces towards the Arabic text on the right */}
+                  <img
+                    id="darclean-hero-image"
+                    src="/darclean-homepage-hero-v1.jpg"
+                    alt={
+                      lang === 'ar'
+                        ? 'طاقم دار كلين طرابلس - نظافة احترافية للمنازل والشركات بزي موحد'
+                        : 'DarClean Tripoli cleaning staff in uniform'
+                    }
+                    className={`w-full h-full object-cover object-center transition-transform duration-700 group-hover:scale-105 ${
+                      isRtl ? '-scale-x-100' : 'scale-x-100'
+                    }`}
+                    referrerPolicy="no-referrer"
+                    onError={(e) => {
+                      const target = e.currentTarget;
+                      if (target.src.endsWith('.jpg')) {
+                        target.src = '/darclean-homepage-hero-v1.png';
+                      }
+                    }}
+                  />
+
+                  {/* Gradient shadow for contrast */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#18292C]/80 via-transparent to-black/20 pointer-events-none" />
+
+                  {/* Top Tripoli Status Pill */}
+                  <div className="absolute top-4 start-4 px-3.5 py-1.5 rounded-full bg-[#18292C]/85 backdrop-blur-md text-white text-xs font-semibold flex items-center gap-2 border border-white/15 shadow-md">
+                    <span className="w-2 h-2 rounded-full bg-[#49C7B5] animate-pulse" />
+                    <span>
+                      {lang === 'ar' ? 'طاقم دار كلين الميداني في طرابلس' : 'DarClean Tripoli Field Team'}
+                    </span>
                   </div>
 
-                  <span className="px-3 py-1 rounded-full bg-[#49C7B5]/15 text-[#0B4F55] text-xs font-bold border border-[#49C7B5]/30">
+                  {/* Top-end 100% Guaranteed Badge */}
+                  <div className="absolute top-4 end-4 px-3 py-1 rounded-full bg-[#F2C85B] text-[#18292C] text-xs font-extrabold shadow-md">
                     {lang === 'ar' ? 'مضمون 100%' : '100% Guaranteed'}
-                  </span>
-                </div>
-
-                {/* Quick Trust Highlights */}
-                <div className="space-y-3 text-xs sm:text-sm text-[#18292C]">
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-[#F7F3EA] border border-[#E5E0D5]">
-                    <ShieldCheck className="w-5 h-5 text-[#0B4F55] flex-shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-bold text-[#0B4F55] block">
-                        {lang === 'ar' ? 'طاقم بزي موحد وبطاقات تعريف' : 'Uniformed Staff with ID Badges'}
-                      </span>
-                      <span className="text-[#5C6E71] text-xs">
-                        {lang === 'ar' ? 'فريق مختلط موثوق ومدقق لأمان منزلك وراحتك' : 'Vetted mixed-gender team respecting privacy & security'}
-                      </span>
-                    </div>
                   </div>
 
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-[#F7F3EA] border border-[#E5E0D5]">
-                    <CheckCircle2 className="w-5 h-5 text-[#49C7B5] flex-shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-bold text-[#0B4F55] block">
-                        {lang === 'ar' ? 'ضمان إعادة تنظيف مجانية' : 'Free Re-clean Guarantee'}
-                      </span>
-                      <span className="text-[#5C6E71] text-xs">
-                        {lang === 'ar' ? 'إذا وُجدت أي ملاحظة يتم تصحيحها خلال 24 ساعة مجاناً' : 'Prompt corrective touch-up within 24 hours free of charge'}
-                      </span>
+                  {/* Bottom Floating Information Overlay with Trust Highlights */}
+                  <div className="absolute bottom-4 inset-x-4 sm:inset-x-6 p-3.5 sm:p-4 rounded-2xl bg-white/95 backdrop-blur-md border border-[#E5E0D5] shadow-lg flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-xl bg-[#0B4F55] text-[#49C7B5] flex items-center justify-center flex-shrink-0">
+                        <ShieldCheck className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="text-xs sm:text-sm font-bold text-[#0B4F55] block">
+                          {lang === 'ar' ? 'طاقم معتمد بزي رسمي وبطاقة تعريف' : 'Uniformed Staff with ID Badges'}
+                        </span>
+                        <span className="text-[11px] sm:text-xs text-[#5C6E71] block">
+                          {lang === 'ar'
+                            ? 'فريق موثوق، مواد تنظيف إيكولوجية، وضمان إعادة تنظيف'
+                            : 'Vetted team, eco-safe supplies & re-clean guarantee'}
+                        </span>
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-start gap-3 p-3 rounded-xl bg-[#F7F3EA] border border-[#E5E0D5]">
-                    <DollarSign className="w-5 h-5 text-[#F2C85B] flex-shrink-0 mt-0.5" />
-                    <div>
-                      <span className="font-bold text-[#0B4F55] block">
-                        {lang === 'ar' ? 'دفع نقداً أو عبر Whish Money' : 'Pay via Cash or Whish Money'}
-                      </span>
-                      <span className="text-[#5C6E71] text-xs">
-                        {lang === 'ar' ? 'بدون دفعات مسبقة إلزامية، ادفع عند استلام النتيجة' : 'Settle only when the cleaning meets your complete satisfaction'}
-                      </span>
-                    </div>
+                    <Link
+                      href={`/${lang}/book`}
+                      className="hidden sm:inline-flex px-3 py-1.5 rounded-xl bg-[#49C7B5] hover:bg-[#3db3a2] text-[#18292C] text-xs font-bold transition-colors flex-shrink-0"
+                    >
+                      {lang === 'ar' ? 'احجز الآن' : 'Book Now'}
+                    </Link>
                   </div>
                 </div>
+              </div>
+            </div>
+          </div>
 
-                {/* Quick Link to Instant Online Booking */}
-                <div className="pt-2">
-                  <Link
-                    href={`/${lang}/book`}
-                    className="w-full py-3 rounded-xl bg-[#F7F3EA] hover:bg-[#EAE5DA] text-[#0B4F55] font-bold text-xs sm:text-sm text-center border border-[#0B4F55]/20 transition-colors flex items-center justify-center gap-1.5"
-                  >
-                    <span>{lang === 'ar' ? 'أو احجز مباشرة عبر نموذج الموقع' : 'Or book using our instant web form'}</span>
-                    {isRtl ? <ArrowLeft className="w-3.5 h-3.5" /> : <ArrowRight className="w-3.5 h-3.5" />}
-                  </Link>
-                </div>
+          {/* Quick Trust Highlights Bar Below Hero Grid */}
+          <div className="mt-12 pt-8 border-t border-[#E5E0D5]/80 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-start gap-3 p-4 rounded-2xl bg-white border border-[#E5E0D5] shadow-xs">
+              <ShieldCheck className="w-5 h-5 text-[#0B4F55] flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-[#0B4F55] text-sm block">
+                  {lang === 'ar' ? 'طاقم بزي موحد وبطاقات تعريف' : 'Uniformed Staff with ID Badges'}
+                </span>
+                <span className="text-[#5C6E71] text-xs leading-relaxed mt-0.5 block">
+                  {lang === 'ar' ? 'فريق مختلط موثوق ومدقق لأمان منزلك وراحتك' : 'Vetted mixed-gender team respecting privacy & security'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-4 rounded-2xl bg-white border border-[#E5E0D5] shadow-xs">
+              <CheckCircle2 className="w-5 h-5 text-[#49C7B5] flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-[#0B4F55] text-sm block">
+                  {lang === 'ar' ? 'ضمان إعادة تنظيف مجانية' : 'Free Re-clean Guarantee'}
+                </span>
+                <span className="text-[#5C6E71] text-xs leading-relaxed mt-0.5 block">
+                  {lang === 'ar' ? 'إذا وُجدت أي ملاحظة يتم تصحيحها خلال 24 ساعة مجاناً' : 'Prompt corrective touch-up within 24 hours free of charge'}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-start gap-3 p-4 rounded-2xl bg-white border border-[#E5E0D5] shadow-xs">
+              <DollarSign className="w-5 h-5 text-[#F2C85B] flex-shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold text-[#0B4F55] text-sm block">
+                  {lang === 'ar' ? 'دفع نقداً أو عبر Whish Money' : 'Pay via Cash or Whish Money'}
+                </span>
+                <span className="text-[#5C6E71] text-xs leading-relaxed mt-0.5 block">
+                  {lang === 'ar' ? 'بدون دفعات مسبقة إلزامية، ادفع عند استلام النتيجة' : 'Settle only when the cleaning meets your complete satisfaction'}
+                </span>
               </div>
             </div>
           </div>
