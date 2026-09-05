@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useId } from 'react';
+import React, { useState, useEffect, useId } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   DollarSign, 
@@ -60,20 +60,8 @@ export default function BookingForm({
 
   // Form State
   const [category, setCategory] = useState<ServiceCategory>(preselectedCategory);
-  const [serviceType, setServiceType] = useState<ServiceType>(() => {
-    if (typeof window !== 'undefined') {
-      const p = new URLSearchParams(window.location.search).get('tier');
-      if (p === 'deep') return 'deep_home';
-    }
-    return preselectedService;
-  });
-  const [areaId, setAreaId] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      const p = new URLSearchParams(window.location.search).get('area');
-      if (p && DEFAULT_SERVICE_AREAS.some((a) => a.id === p)) return p;
-    }
-    return 'tripoli_central';
-  });
+  const [serviceType, setServiceType] = useState<ServiceType>(preselectedService);
+  const [areaId, setAreaId] = useState<string>('tripoli_central');
   const [addressDetails, setAddressDetails] = useState('');
   const [building, setBuilding] = useState('');
   const [floor, setFloor] = useState('');
@@ -84,23 +72,42 @@ export default function BookingForm({
   const [serviceDate, setServiceDate] = useState(() => new Date(Date.now() + 86400000).toISOString().split('T')[0]);
   const [timeSlot, setTimeSlot] = useState('09:00 - 12:00 (صباحاً / Morning)');
 
-  // Cleaners & Hours (enforce min 2 hours per cleaner, with lazy query param initialization)
-  const [cleanersCount, setCleanersCount] = useState<number>(() => {
-    if (typeof window !== 'undefined') {
-      const p = new URLSearchParams(window.location.search).get('cleaners');
-      const val = p ? parseInt(p, 10) : NaN;
-      if (!isNaN(val) && val >= 1 && val <= 20) return val;
-    }
-    return 1;
-  });
-  const [estimatedHours, setEstimatedHours] = useState<number>(() => {
-    if (typeof window !== 'undefined') {
-      const p = new URLSearchParams(window.location.search).get('hours');
-      const val = p ? parseInt(p, 10) : NaN;
-      if (!isNaN(val) && val >= 2 && val <= 16) return val;
-    }
-    return 3;
-  });
+  // Cleaners & Hours (enforce min 2 hours per cleaner)
+  const [cleanersCount, setCleanersCount] = useState<number>(1);
+  const [estimatedHours, setEstimatedHours] = useState<number>(3);
+
+  // Sync optional client query parameters safely after hydration mount
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (typeof window === 'undefined') return;
+      try {
+        const searchParams = new URLSearchParams(window.location.search);
+        const tier = searchParams.get('tier');
+        if (tier === 'deep') setServiceType('deep_home');
+
+        const area = searchParams.get('area');
+        if (area && DEFAULT_SERVICE_AREAS.some((a) => a.id === area)) {
+          setAreaId(area);
+        }
+
+        const cleaners = searchParams.get('cleaners');
+        const cleanersVal = cleaners ? parseInt(cleaners, 10) : NaN;
+        if (!isNaN(cleanersVal) && cleanersVal >= 1 && cleanersVal <= 20) {
+          setCleanersCount(cleanersVal);
+        }
+
+        const hours = searchParams.get('hours');
+        const hoursVal = hours ? parseInt(hours, 10) : NaN;
+        if (!isNaN(hoursVal) && hoursVal >= 2 && hoursVal <= 16) {
+          setEstimatedHours(hoursVal);
+        }
+      } catch {
+        // Safe fallback
+      }
+    }, 0);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   // Extras & Preferences
   const [selectedExtras, setSelectedExtras] = useState<string[]>([]);
@@ -726,6 +733,7 @@ export default function BookingForm({
               value={serviceDate}
               onChange={(e) => setServiceDate(e.target.value)}
               className="w-full px-4 py-3 rounded-xl border border-[#E5E0D5] bg-white text-[#18292C] text-sm focus:ring-2 focus:ring-[#0B4F55] font-medium"
+              suppressHydrationWarning
             />
           </div>
 

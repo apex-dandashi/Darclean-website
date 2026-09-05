@@ -256,6 +256,7 @@ export default function MobileQuickActionDock({ lang }: MobileQuickActionDockPro
                   value={selectedAreaId}
                   onChange={(e) => setSelectedAreaId(e.target.value)}
                   className="w-full p-2.5 rounded-xl bg-white/10 border border-white/20 text-white text-xs font-semibold focus:outline-none focus:ring-1 focus:ring-[#49C7B5]"
+                  suppressHydrationWarning
                 >
                   <optgroup label={isRtl ? 'داخل طرابلس والميناء (0$ تنقل)' : 'Inside Tripoli & Mina ($0 Travel)'} className="text-[#18292C]">
                     {DEFAULT_SERVICE_AREAS.filter((a) => a.isInsideTripoli).map((area) => (

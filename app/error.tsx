@@ -2,7 +2,8 @@
 
 import React, { useEffect } from 'react';
 import Link from 'next/link';
-import { AlertTriangle, RotateCcw, Home } from 'lucide-react';
+import { AlertTriangle, RotateCcw, Home, MessageCircle } from 'lucide-react';
+import { WHATSAPP_LINK } from '@/lib/i18n';
 
 export default function GlobalAppError({
   error,
@@ -12,8 +13,19 @@ export default function GlobalAppError({
   reset: () => void;
 }) {
   useEffect(() => {
+    // If Next.js internal redirect was somehow intercepted, pass it along
+    if (error?.message === 'NEXT_REDIRECT' || error?.digest?.startsWith('NEXT_REDIRECT')) {
+      if (typeof window !== 'undefined') {
+        window.location.href = '/ar';
+      }
+      return;
+    }
     console.error('DarClean application runtime error:', error);
   }, [error]);
+
+  if (error?.message === 'NEXT_REDIRECT' || error?.digest?.startsWith('NEXT_REDIRECT')) {
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-[#18292C] text-[#E5E0D5] flex items-center justify-center p-4">
@@ -43,7 +55,20 @@ export default function GlobalAppError({
             الرئيسية
           </Link>
         </div>
+
+        <div className="pt-2 border-t border-white/10">
+          <a
+            href={WHATSAPP_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-[#49C7B5] hover:underline inline-flex items-center gap-1.5 justify-center"
+          >
+            <MessageCircle className="w-3.5 h-3.5" />
+            <span>تواصل مباشرة عبر واتساب للمساعدة الفورية</span>
+          </a>
+        </div>
       </div>
     </div>
   );
 }
+

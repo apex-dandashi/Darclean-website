@@ -248,7 +248,7 @@ export default function Footer({ lang }: FooterProps) {
 
         {/* Bottom copyright & Terms */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-[#E5E0D5]/70">
-          <p>
+          <p suppressHydrationWarning>
             © {new Date().getFullYear()} DarClean • دار كلين (darclean.pro). {lang === 'ar' ? 'جميع الحقوق محفوظة.' : 'All rights reserved.'}
           </p>
           <div className="flex items-center gap-4">

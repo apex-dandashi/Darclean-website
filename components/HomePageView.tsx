@@ -910,6 +910,7 @@ export default function HomePageView({ lang }: HomePageViewProps) {
                       value={selectedAreaId}
                       onChange={(e) => setSelectedAreaId(e.target.value)}
                       className="w-full p-2.5 bg-[#F7F3EA] border border-[#E5E0D5] rounded-xl text-xs font-semibold text-[#18292C] focus:outline-none focus:ring-2 focus:ring-[#0B4F55]"
+                      suppressHydrationWarning
                     >
                       <optgroup label={lang === 'ar' ? 'داخل طرابلس الكبرى والميناء (تنقل مجاني 0$)' : 'Inside Tripoli & Al-Mina (Free Transport $0)'}>
                         {DEFAULT_SERVICE_AREAS.filter((a) => a.isInsideTripoli).map((area) => (
