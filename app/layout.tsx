@@ -100,6 +100,16 @@ export const metadata: Metadata = {
 export default function RootLayout({children}: {children: React.ReactNode}) {
   return (
     <html lang="ar" suppressHydrationWarning>
+      <head>
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+              svg { max-width: 100%; }
+              img { max-width: 100%; height: auto; }
+            `,
+          }}
+        />
+      </head>
       <body suppressHydrationWarning>{children}</body>
     </html>
   );

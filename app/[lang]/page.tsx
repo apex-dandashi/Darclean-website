@@ -4,7 +4,11 @@ import HomePageView from '@/components/HomePageView';
 import { Language } from '@/lib/types';
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 interface PageProps {
+
   params: Promise<{ lang: string }>;
 }
 

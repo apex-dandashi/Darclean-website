@@ -30,6 +30,9 @@ function WhatsAppIcon({ className = 'w-5 h-5' }: { className?: string }) {
     <svg 
       viewBox="0 0 24 24" 
       fill="currentColor" 
+      width="20"
+      height="20"
+      style={{ maxWidth: '24px', maxHeight: '24px', display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}
       className={className}
       aria-hidden="true"
     >

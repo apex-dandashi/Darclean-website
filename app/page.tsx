@@ -2,7 +2,11 @@ import React from 'react';
 import HomePageView from '@/components/HomePageView';
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata: Metadata = {
+
   title: 'دار كلين | تنظيف منازل ومكاتب في طرابلس والكورة والجوار - DarClean',
   description: 'منصة دار كلين لخدمات تنظيف المنازل والشركات في طرابلس، الكورة، والشمال اللبناني. تسعير شفاف يبدأ من 10$ للساعة لكل عامل، ومواد ومعدات مشمولة، وضمان إعادة تنظيف مجاني.',
   alternates: {
