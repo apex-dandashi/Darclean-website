@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 import { Language } from '@/lib/types';
 import { DEFAULT_SERVICE_AREAS } from '@/lib/db';
-import { WHATSAPP_NUMBER } from '@/lib/i18n';
+import { WHATSAPP_LINK, WHATSAPP_NUMBER } from '@/lib/i18n';
 
 interface MobileQuickActionDockProps {
   lang: Language;
@@ -84,8 +84,8 @@ export default function MobileQuickActionDock({ lang }: MobileQuickActionDockPro
     ? `مرحباً دار كلين، قمت بحساب تقدير عبر حاسبة الموقع:\n- عدد عمال التنظيف: ${cleaners} عمال\n- ساعات العمل لكل عامل: ${effectiveHours} ساعات (إجمالي ${cleaners * effectiveHours} ساعة عمل)\n- المنطقة: ${activeArea.nameAr}\n- رسم الانتقال: ${travelCost === 0 ? 'مجاني 0$' : `${travelCost}$`}\n- التكلفة التقديرية: $${estimatedTotal} (~${(estimatedTotal * 89500).toLocaleString('en-US')} ل.ل)\n\nأود تثبيت موعد التنظيف.`
     : `Hello DarClean, I calculated an estimate on your website:\n- Cleaners: ${cleaners}\n- Hours: ${effectiveHours} hrs per cleaner (${cleaners * effectiveHours} total crew hours)\n- Location: ${activeArea.nameEn}\n- Travel Fee: ${travelCost === 0 ? 'Free $0' : `$${travelCost}`}\n- Estimated Total: $${estimatedTotal} USD\n\nI would like to confirm availability.`;
 
-  const defaultWhatsAppUrl = `https://wa.me/96176408309?text=${encodeURIComponent(defaultWhatsAppText)}`;
-  const estimatedWhatsAppUrl = `https://wa.me/96176408309?text=${encodeURIComponent(estimatedWhatsAppText)}`;
+  const defaultWhatsAppUrl = `${WHATSAPP_LINK}?text=${encodeURIComponent(defaultWhatsAppText)}`;
+  const estimatedWhatsAppUrl = `${WHATSAPP_LINK}?text=${encodeURIComponent(estimatedWhatsAppText)}`;
 
   // Handler for jumping to homepage calculator if present
   const handleScrollToFullCalculator = () => {

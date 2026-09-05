@@ -1007,7 +1007,7 @@ export default function HomePageView({ lang }: HomePageViewProps) {
                 {/* CTA buttons with dynamic prefilled parameters */}
                 <div className="flex flex-col sm:flex-row gap-2.5 pt-1">
                   <a
-                    href={`https://wa.me/96176408309?text=${encodeURIComponent(
+                    href={`${WHATSAPP_LINK}?text=${encodeURIComponent(
                       lang === 'ar'
                         ? `مرحباً دار كلين، أود حجز تنظيف بناءً على الحاسبة:\n• الخدمة: ${serviceTier === 'deep' ? 'تنظيف عميق / بعد ورشة' : 'تنظيف منزلي قياسي'}\n• عدد العمال: ${cleaners} عمال\n• الساعات لكل عامل: ${effectiveHours} ساعات (إجمالي ${cleaners * effectiveHours} ساعة عمل)\n• المنطقة: ${activeArea.nameAr}\n• رسم التنقل: ${travelCost === 0 ? 'مجاني 0$' : `${travelCost}$`}\n• التكلفة التقديرية: ${estimatedTotal}$ (~${(estimatedTotal * 89500).toLocaleString('en-US')} ل.ل)\nأرجو تأكيد أقرب موعد متاح.`
                         : `Hello DarClean, I would like to book cleaning:\n• Service: ${serviceTier === 'deep' ? 'Deep Cleaning' : 'Standard Cleaning'}\n• Cleaners: ${cleaners}\n• Hours per cleaner: ${effectiveHours} hrs (${cleaners * effectiveHours} total crew hours)\n• Location: ${activeArea.nameEn}\n• Travel fee: ${travelCost === 0 ? 'Free $0' : `$${travelCost}`}\n• Estimated Total: $${estimatedTotal} USD\nPlease confirm availability.`

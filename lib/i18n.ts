@@ -1,7 +1,7 @@
 import { BookingStatus, Language, ServiceType } from './types';
 
-export const WHATSAPP_NUMBER = '+961 76 408 309';
-export const WHATSAPP_LINK = 'https://wa.me/96176408309';
+export const WHATSAPP_NUMBER = '+961 79 194 908';
+export const WHATSAPP_LINK = 'https://wa.me/96179194908';
 export const BRAND_NAME_AR = 'دار كلين';
 export const BRAND_NAME_EN = 'DarClean';
 export const WEBSITE_DOMAIN = 'darclean.pro';
